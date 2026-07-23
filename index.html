@@ -34,7 +34,7 @@
 }
 
 /* ── standalone deck shell ── */
-html,body{margin:0;height:100%;background:#0b0d16;overflow:hidden;font-family:'Inter',system-ui,sans-serif;}
+html,body{margin:0;height:100%;background:#0b0d16;overflow:hidden;font-family:'Inter',system-ui,sans-serif;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;}
 #stage{position:fixed;inset:0;overflow:hidden;}
 #canvas{position:absolute;top:50%;left:50%;width:1920px;height:1080px;transform-origin:center center;transform:translate(-50%,-50%);}
 #canvas .slide{position:absolute;inset:0;width:1920px;height:1080px;display:none;flex-direction:column;box-sizing:border-box;
@@ -2113,9 +2113,20 @@ packages/
   var stage=document.getElementById('stage'),canvas=document.getElementById('canvas'),
       progress=document.getElementById('progress'),counter=document.getElementById('counter');
   var slides=Array.prototype.slice.call(canvas.querySelectorAll('.slide'));
-  var W=1920,H=1080,i=0;
+  var W=1920,H=1080,i=0,rotated=false;
   function fromHash(){var h=parseInt((location.hash||'').replace('#',''),10);return (h&&h>=1&&h<=slides.length)?h-1:0;}
-  function fit(){var s=Math.min(window.innerWidth/W,window.innerHeight/H);canvas.style.transform='translate(-50%,-50%) scale('+s+')';}
+  function fit(){
+    var vw=window.innerWidth,vh=window.innerHeight;
+    // On a narrow portrait screen, rotate the 16:9 canvas so each slide fills the phone sideways.
+    rotated=(vw<vh&&vw<820);
+    if(rotated){
+      var s=Math.min(vh/W,vw/H);
+      canvas.style.transform='translate(-50%,-50%) rotate(90deg) scale('+s+')';
+    }else{
+      var s=Math.min(vw/W,vh/H);
+      canvas.style.transform='translate(-50%,-50%) scale('+s+')';
+    }
+  }
   function show(n,push){
     i=Math.max(0,Math.min(slides.length-1,n));
     slides.forEach(function(el,idx){el.style.display=idx===i?'flex':'none';});
@@ -2125,6 +2136,7 @@ packages/
     slides[i].querySelectorAll('.rise').forEach(function(r){r.style.animation='none';void r.offsetWidth;r.style.animation='';});
   }
   window.addEventListener('resize',fit);
+  window.addEventListener('orientationchange',fit);
   window.addEventListener('keydown',function(e){
     switch(e.key){
       case 'ArrowRight':case 'PageDown':case ' ':case 'Spacebar':e.preventDefault();show(i+1);break;
@@ -2135,6 +2147,20 @@ packages/
     }
   });
   window.addEventListener('hashchange',function(){show(fromHash(),false);});
+  // ── touch: swipe left/right to navigate ──
+  var tx=0,ty=0,tt=0;
+  stage.addEventListener('touchstart',function(e){
+    var t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;tt=e.timeStamp;
+  },{passive:true});
+  stage.addEventListener('touchend',function(e){
+    var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty,dt=e.timeStamp-tt;
+    // When the canvas is rotated 90°, the visual left/right axis is the screen's vertical axis.
+    var along=rotated?dy:dx,across=rotated?dx:dy;
+    // far enough, fast enough, and not mostly off-axis
+    if(Math.abs(along)>50&&Math.abs(along)>Math.abs(across)*1.5&&dt<800){
+      show(along<0?i+1:i-1);
+    }
+  },{passive:true});
   fit();show(fromHash(),false);
 })();
 </script>
