@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AQX Trader Frontend — Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   AQX Back Office — design tokens (inlined, standalone)
+   ============================================================ */
+:root{
+  --aqx-brand:#00BCD8;        --aqx-brand-hover:#009DB5;  --aqx-brand-soft:rgba(0,188,216,.08);
+  --aqx-primary:#0073EA;      --aqx-primary-hover:#0060B9;
+  --aqx-datahub:#A2846B;
+  --aqx-ink:#292F4C;          /* section-divider navy */
+  --aqx-text-primary:#323338; --aqx-text-secondary:#676879;
+  --aqx-surface:#ffffff;      --aqx-surface-alt:#F6F7FB;
+  --aqx-surface-selected:rgba(0,188,216,.08);
+  --aqx-border:#E6E9EF;       --aqx-border-strong:#C3C6D4;
+  --aqx-positive:#00854D;     --aqx-positive-soft:#E7F9F1;
+  --aqx-negative:#D83A52;     --aqx-negative-soft:#FFF4F5;
+  --aqx-warning:#FFCB00;      --aqx-warning-soft:#FFF7E8;
+  --aqx-radius-sm:4px; --aqx-radius-md:8px; --aqx-radius-lg:16px;
+  --aqx-shadow-md:0 6px 20px rgba(0,0,0,.2);
+  --aqx-shadow-lg:0 15px 50px rgba(0,0,0,.3);
+  /* code syntax palette (matches the source deck) */
+  --c-panel:#292F4C; --c-fg:#EDEEF2; --c-cmt:#9BA0B5;
+  --c-tag:#4DD8EA; --c-attr:#FFCB00; --c-str:#7CD9A8; --c-fn:#FFCB00; --c-kw:#4DD8EA; --c-warn:#F28B9B;
+  --deck-code-size:26px;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+
+/* ── standalone deck shell ── */
+html,body{margin:0;height:100%;background:#0b0d16;overflow:hidden;font-family:'Inter',system-ui,sans-serif;}
+#stage{position:fixed;inset:0;overflow:hidden;}
+#canvas{position:absolute;top:50%;left:50%;width:1920px;height:1080px;transform-origin:center center;transform:translate(-50%,-50%);}
+#canvas .slide{position:absolute;inset:0;width:1920px;height:1080px;display:none;flex-direction:column;box-sizing:border-box;
+  padding:88px 110px 88px;background:#fff;color:var(--aqx-text-primary);font-family:'Inter',system-ui,sans-serif;overflow:hidden;}
+#counter{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10;font-family:var(--mono);font-size:15px;letter-spacing:.08em;color:#fff;background:rgba(0,0,0,.55);padding:7px 16px;border-radius:2px;opacity:.5;transition:opacity .3s;pointer-events:none;}
+#stage:hover #counter{opacity:.9;}
+#progress{position:fixed;left:0;top:0;height:4px;background:var(--aqx-brand);z-index:10;transition:width .3s;}
+
+/* ── typographic + component primitives ── */
+.slide h1,.slide h2,.slide h3,.slide h4{margin:0;font-weight:700;letter-spacing:-1px;line-height:1.1;}
+.slide p{margin:0;}
+.eyebrow{display:flex;align-items:center;gap:16px;}
+.eyebrow .bar{width:6px;height:28px;background:var(--aqx-brand);border-radius:3px;}
+.eyebrow span{font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--aqx-text-secondary);}
+.h2{font-size:64px;letter-spacing:-1px;}
+.lead{font-size:30px;line-height:1.5;color:var(--aqx-text-secondary);max-width:1300px;}
+.dim{color:var(--aqx-text-secondary);}
+.card{background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:8px;}
+.rule-chip{display:flex;align-items:center;gap:20px;background:var(--aqx-surface-selected);border:1px solid var(--aqx-brand);border-radius:8px;padding:26px 36px;}
+.rule-chip span{font-size:26px;line-height:1.5;color:var(--aqx-text-primary);}
+.dot{width:14px;height:14px;border-radius:3px;background:var(--aqx-brand);margin-top:13px;flex-shrink:0;}
+.bullet{display:flex;gap:24px;align-items:flex-start;}
+.bullet h3{font-size:34px;font-weight:600;margin-bottom:6px;}
+.bullet p{font-size:28px;line-height:1.5;color:var(--aqx-text-secondary);}
+.badge{font-size:20px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:4px;}
+.badge.stack{color:var(--aqx-brand-hover);background:var(--aqx-brand-soft);border:1px solid var(--aqx-brand);}
+.badge.rule{color:var(--aqx-datahub);background:rgba(162,132,107,.1);border:1px solid var(--aqx-datahub);}
+
+/* code panels */
+.code{background:var(--c-panel);border-radius:8px;overflow:hidden;box-shadow:var(--aqx-shadow-md);}
+.code .bar{display:flex;align-items:center;gap:16px;padding:18px 32px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.1);}
+.code .bar .fn{font-size:23px;font-family:var(--mono);color:rgba(255,255,255,.6);}
+.code .dot3{display:flex;gap:9px;}
+.code .dot3 i{width:13px;height:13px;border-radius:50%;display:block;}
+.code pre{margin:0;padding:34px 44px;font-family:var(--mono);font-size:var(--deck-code-size);line-height:1.7;color:var(--c-fg);white-space:pre;overflow:hidden;}
+.tag{color:var(--c-tag);} .attr{color:var(--c-attr);} .str{color:var(--c-str);} .kw{color:var(--c-kw);} .fn{color:var(--c-fn);} .cmt{color:var(--c-cmt);} .warn{color:var(--c-warn);}
+
+/* section divider */
+.divider{background:var(--aqx-ink)!important;color:#fff!important;justify-content:center;}
+.divider .kick{font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--aqx-brand);}
+.divider .num{font-size:240px;font-weight:800;line-height:1;color:var(--aqx-brand);margin:16px 0 8px;}
+.divider h2{font-size:84px;}
+.divider .lead{color:rgba(255,255,255,.7);}
+
+/* journey strip */
+.journey{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+.journey .stop{flex:1;min-width:0;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:8px;padding:22px 20px;display:flex;flex-direction:column;gap:8px;text-align:center;align-items:center;}
+.journey .stop .ic{font-size:34px;}
+.journey .stop .lb{font-size:22px;font-weight:700;}
+.journey .stop .sub{font-size:17px;color:var(--aqx-text-secondary);}
+.journey .arw{display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:26px;color:var(--aqx-border-strong);}
+
+/* pill row */
+.pill{display:inline-flex;align-items:center;gap:10px;font-size:24px;font-weight:600;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:999px;padding:12px 24px;color:var(--aqx-text-primary);}
+
+/* tables */
+table.aqx{border-collapse:collapse;width:100%;font-size:26px;}
+table.aqx th{text-align:left;font-weight:700;color:var(--aqx-text-primary);padding:18px 24px;border-bottom:2px solid var(--aqx-border-strong);font-size:24px;text-transform:uppercase;letter-spacing:1px;}
+table.aqx th.w{color:var(--aqx-brand-hover);}
+table.aqx td{padding:18px 24px;border-bottom:1px solid var(--aqx-border);color:var(--aqx-text-secondary);vertical-align:top;line-height:1.4;}
+table.aqx td.k{color:var(--aqx-text-primary);font-weight:600;}
+table.aqx tr:last-child td{border-bottom:none;}
+.mono{font-family:var(--mono);font-size:.92em;background:var(--aqx-surface-alt);padding:2px 8px;border-radius:4px;color:var(--aqx-text-primary);}
+
+.rise{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;}
+@keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="progress"></div>
+  <div id="canvas">
+    <!-- ============ TITLE ============ -->
+    <section class="slide">
+      <div style="display:flex;align-items:center;gap:20px;">
+        <svg width="53" height="55" viewBox="8 2.5 53 55" fill="none" style="height:52px;width:auto;"><path d="M13.0886 26.922L13.0889 19.1286L13.0887 19.1285L31.724 8.3722L38.4995 12.283L43.5905 9.35008L42.6551 8.81015V8.80857L31.7255 2.5L31.724 2.50083L31.7226 2.5L8.00479 16.1914L8 16.1887V29.8535L13.0886 26.922Z" fill="#C939AA"/><path d="M18.48 40.2811L23.5685 43.2181V32.9381L18.48 35.8696V40.281L18.48 40.2811Z" fill="#00BCD8"/><path d="M39.8795 23.5412V43.2181L39.8795 43.2181L44.968 40.2811V20.6096L39.8795 23.5412Z" fill="#00BCD8"/><path d="M50.9599 3.6156L52.723 6.66934L8.02881 32.4026V38.27V38.2739L29.1797 26.0951V46.4569L31.724 47.9254L34.2683 46.4569V23.1651L55.2663 11.0744L57.0821 14.2195L60.8683 4.96425L50.9599 3.6156Z" fill="#9CCA43"/><path d="M53.1517 14.8687L48.0661 17.8048L50.3593 19.1285L50.3592 19.1286L50.3596 19.3386V32.4612V33.4185V40.6614L50.3592 40.8714L50.3593 40.8716L31.724 51.6278L13.0888 40.8716L13.0889 40.8714L13.0885 40.6614V37.9992L8 40.937V42.6346V43.8058V43.8113L8.00479 43.8085L20.793 51.1899V51.1914L31.7226 57.5L31.724 57.4992L31.7255 57.5V57.5V57.5L42.655 51.1914V51.1899L55.4433 43.8085L55.4481 43.8113V43.8058V42.6346V36.3486V35.3914V17.3655V16.1942V16.1887L55.4433 16.1914L53.1517 14.8687Z" fill="#715FF1"/></svg>
+        <span style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--aqx-text-secondary);">AQX Trader · Frontend Onboarding</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:36px;max-width:1500px;">
+        <div class="rise" style="width:96px;height:8px;background:var(--aqx-brand);border-radius:4px;"></div>
+        <h1 class="rise" style="font-size:112px;line-height:1.03;letter-spacing:-2px;">The Frontend,<br>top to bottom</h1>
+        <p class="rise lead" style="font-size:38px;max-width:1200px;">From the three languages of the browser, up through React and our MVVM architecture, across to mobile — and the stack that ships it all.</p>
+      </div>
+      <div style="display:flex;gap:48px;font-size:26px;color:var(--aqx-text-secondary);">
+        <span style="font-weight:600;color:var(--aqx-text-primary);">Frontend Guild</span>
+        <span>React · React Native · react-native-web</span>
+        <span>pnpm monorepo</span>
+      </div>
+    </section>
+
+    <!-- ============ AGENDA ============ -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>Agenda</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 56px;">Six stops, one system</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;flex:1;align-content:start;">
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">01</span><h3 style="font-size:34px;font-weight:600;">The web platform</h3><p style="font-size:26px;line-height:1.45;" class="dim">HTML, CSS, JavaScript — the three primitives everything sits on.</p></div>
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">02</span><h3 style="font-size:34px;font-weight:600;">React fundamentals</h3><p style="font-size:26px;line-height:1.45;" class="dim">The render lifecycle, state, effects, and why we lift state up.</p></div>
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">03</span><h3 style="font-size:34px;font-weight:600;">aqx-core (MVVM)</h3><p style="font-size:26px;line-height:1.45;" class="dim">Model · Service · ViewController · View — one responsibility each.</p></div>
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">04</span><h3 style="font-size:34px;font-weight:600;">React vs React&nbsp;Native</h3><p style="font-size:26px;line-height:1.45;" class="dim">Same logic, different primitives — the translation table.</p></div>
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">05</span><h3 style="font-size:34px;font-weight:600;">Mobile conventions</h3><p style="font-size:26px;line-height:1.45;" class="dim">The house rules and gotchas that only bite on device.</p></div>
+        <div class="card rise" style="padding:40px 38px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:52px;font-weight:800;color:var(--aqx-brand);">06</span><h3 style="font-size:34px;font-weight:600;">Stack &amp; libraries</h3><p style="font-size:26px;line-height:1.45;" class="dim">A reference map of what we use and what each piece is for.</p></div>
+      </div>
+    </section>
+
+<!-- What you'll be able to do -->
+<section class="slide divider">
+  <span class="kick">Section 01</span>
+  <span class="num">01</span>
+  <h2 style="margin:0 0 28px;">The web platform</h2>
+  <p class="lead" style="font-size:34px;">How the web actually thinks — the three languages, the tree, and the one thread. Concepts now; the code comes in Section 02.</p>
+</section>
+
+    <!-- 1.1 three languages -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>The web platform</span></div>
+      <h2 class="h2 rise" style="margin:30px 0 18px;">Three languages, three jobs</h2>
+      <p class="lead rise" style="margin-bottom:36px;font-size:28px;">Every screen a user touches is these three files talking to each other — take one button and watch each language add its part.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-bottom:30px;">
+        <div class="card rise" style="padding:28px 32px;display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:24px;font-weight:700;letter-spacing:2px;color:var(--aqx-brand-hover);">HTML</span>
+          <h3 style="font-size:32px;font-weight:700;">Structure</h3>
+          <p style="font-size:24px;line-height:1.4;" class="dim">What the document <em>is</em>. Elements, nesting, the DOM as a tree.</p>
+          <div style="margin-top:6px;font-size:22px;font-weight:600;color:var(--aqx-text-primary);">≈ the skeleton</div>
+        </div>
+        <div class="card rise" style="padding:28px 32px;display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:24px;font-weight:700;letter-spacing:2px;color:var(--aqx-brand-hover);">CSS</span>
+          <h3 style="font-size:32px;font-weight:700;">Presentation</h3>
+          <p style="font-size:24px;line-height:1.4;" class="dim">How it looks. Box model, layout, specificity &amp; the cascade.</p>
+          <div style="margin-top:6px;font-size:22px;font-weight:600;color:var(--aqx-text-primary);">≈ the skin</div>
+        </div>
+        <div class="card rise" style="padding:28px 32px;display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:24px;font-weight:700;letter-spacing:2px;color:var(--aqx-brand-hover);">JavaScript</span>
+          <h3 style="font-size:32px;font-weight:700;">Behaviour</h3>
+          <p style="font-size:24px;line-height:1.4;" class="dim">How it reacts. The event loop, reading input, updating the DOM.</p>
+          <div style="margin-top:6px;font-size:22px;font-weight:600;color:var(--aqx-text-primary);">≈ the muscle</div>
+        </div>
+      </div>
+      <!-- one button, three languages -->
+      <div class="rise" style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+        <span style="font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--aqx-text-secondary);">One button →</span>
+        <button onclick="alert('Order placed: Buy EURUSD ✔');" style="font-family:'Inter',sans-serif;font-size:24px;font-weight:600;color:#fff;background:var(--aqx-brand);border:none;border-radius:8px;padding:12px 28px;box-shadow:0 4px 12px rgba(0,188,216,.3);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--aqx-brand-hover)'" onmouseout="this.style.background='var(--aqx-brand)'">Buy EURUSD</button>
+        <span style="font-size:22px;" class="dim">— structured, styled, and made to react:</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;flex:1;align-content:start;">
+        <div class="code rise" style="box-shadow:var(--aqx-shadow-md);">
+          <div class="bar" style="padding:12px 24px;"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn" style="font-size:19px;">index.html</span></div>
+<pre style="font-size:20px;line-height:1.6;padding:22px 26px;"><span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"buy"</span><span class="tag">&gt;</span>
+  Buy EURUSD
+<span class="tag">&lt;/button&gt;</span></pre>
+        </div>
+        <div class="code rise" style="box-shadow:var(--aqx-shadow-md);">
+          <div class="bar" style="padding:12px 24px;"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn" style="font-size:19px;">style.css</span></div>
+<pre style="font-size:20px;line-height:1.6;padding:22px 26px;"><span class="attr">#buy</span> {
+  <span class="kw">background</span>: <span class="str">#00BCD8</span>;
+  <span class="kw">color</span>: <span class="str">#fff</span>;
+  <span class="kw">border-radius</span>: <span class="str">8px</span>;
+}</pre>
+        </div>
+        <div class="code rise" style="box-shadow:var(--aqx-shadow-md);">
+          <div class="bar" style="padding:12px 24px;"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn" style="font-size:19px;">app.js</span></div>
+<pre style="font-size:20px;line-height:1.6;padding:22px 26px;">buy.<span class="fn">addEventListener</span>(
+  <span class="str">"click"</span>, () =&gt; {
+    <span class="fn">alert</span>(<span class="str">"Order placed ✔"</span>);
+  });</pre>
+        </div>
+      </div>
+    </section>
+
+
+
+<!-- HTML — text describing a tree -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>The web platform · HTML</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">HTML — text describing a tree</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Nested tags describe content and form a <strong>tree</strong>. That tree idea recurs everywhere later.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">order-ticket.html</span></div>
+<pre><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"order-ticket"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h2&gt;</span>BTCUSDT<span class="tag">&lt;/h2&gt;</span>
+  <span class="tag">&lt;label&gt;</span>
+    Quantity
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"number"</span> <span class="attr">placeholder</span>=<span class="str">"0.00"</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"buy"</span><span class="tag">&gt;</span>Buy<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"sell"</span><span class="tag">&gt;</span>Sell<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:32px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>An order ticket</h3><p>Structure you'll recognize from any trading UI — the tags nest, and the nesting is the tree.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>The DOM — HTML come alive</h3><p>The browser <strong>parses</strong> this text into a <strong>live tree of objects</strong>. JS reads and edits it anytime, and the screen updates instantly — "manipulating the DOM" is exactly this, and React is a smarter way to do it.</p>
+      </div></div>
+      <div class="rule-chip rise" style="max-width:640px;"><span><strong>Mental model:</strong> HTML is text describing a tree of boxes; the DOM is that tree, alive. Learn ~15 tags — <span class="mono">div span h1-h6 p button a input select form label table ul li img</span> — and you can read most markup.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- The div — boxes inside boxes -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>The web platform · the div</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">The &lt;div&gt; — boxes inside boxes</h2>
+  <p class="lead rise" style="margin-bottom:40px;">A div is the generic box — it just groups and wraps. The browser lays out every page as boxes inside boxes.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">card.html</span></div>
+<pre><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"card"</span><span class="tag">&gt;</span>        <span class="cmt">// the box</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"row"</span><span class="tag">&gt;</span>      <span class="cmt">// a box inside</span>
+    <span class="tag">&lt;span&gt;</span>BTCUSDT<span class="tag">&lt;/span&gt;</span>  <span class="cmt">// text box</span>
+    <span class="tag">&lt;span&gt;</span>$67,000<span class="tag">&lt;/span&gt;</span>  <span class="cmt">// text box</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button&gt;</span>Buy<span class="tag">&lt;/button&gt;</span>     <span class="cmt">// button box</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </div>
+    <div class="rise" style="border:3px solid var(--aqx-brand);border-radius:12px;padding:26px;background:#fff;box-shadow:0 6px 22px rgba(0,188,216,.18);">
+      <div style="display:inline-block;font-size:22px;font-weight:800;letter-spacing:.5px;color:#fff;background:var(--aqx-brand);border-radius:6px;padding:5px 14px;margin-bottom:18px;">&lt;div&gt; card</div>
+      <div style="border:3px solid var(--aqx-ink);border-radius:10px;padding:24px;background:rgba(41,47,76,.06);margin-bottom:22px;">
+        <div style="display:inline-block;font-size:20px;font-weight:800;letter-spacing:.5px;color:#fff;background:var(--aqx-ink);border-radius:6px;padding:5px 14px;margin-bottom:16px;">&lt;div&gt; row</div>
+        <div style="display:flex;gap:22px;">
+          <div style="flex:1;border:2px solid var(--aqx-text-primary);border-radius:8px;padding:20px;text-align:center;font-size:24px;font-weight:700;color:var(--aqx-text-primary);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.12);">BTCUSDT</div>
+          <div style="flex:1;border:2px solid var(--aqx-text-primary);border-radius:8px;padding:20px;text-align:center;font-size:24px;font-weight:700;color:var(--aqx-text-primary);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.12);">$67,000</div>
+        </div>
+      </div>
+      <div style="border:none;border-radius:8px;padding:20px 0;text-align:center;font-size:24px;font-weight:700;color:#fff;background:var(--aqx-brand);width:200px;box-shadow:0 4px 12px rgba(0,188,216,.35);">Buy</div>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:36px;"><span><strong>Mental model:</strong> "Make a layout" really means draw the right boxes, then arrange them. Once you see the boxes, the CSS stops feeling arbitrary.</span></div>
+</section>
+
+<!-- CSS — select, then declare -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>The web platform · CSS</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">CSS — select, then declare</h2>
+  <p class="lead rise" style="margin-bottom:40px;">A rule is a <strong>selector</strong> (who) plus <strong>declarations</strong> (how they look). When rules collide, the more specific one wins — the cascade.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">styles.css</span></div>
+<pre><span class="cmt">/* selector — who */</span>
+<span class="fn">.buy</span> {
+  <span class="attr">background</span>: <span class="str">#16A34A</span>;   <span class="cmt">/* property: value */</span>
+  <span class="attr">padding</span>: 8px 16px;
+  <span class="attr">margin</span>: 4px;
+}
+<span class="fn">.buy:hover</span> { <span class="attr">opacity</span>: 0.9; }</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      <h3 style="font-size:34px;font-weight:600;">Selectors — who it applies to</h3>
+      <div class="bullet rise"><div class="dot"></div><div><h3><span class="mono">button</span></h3><p>Every button (tag).</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3><span class="mono">.buy</span></h3><p>Every <span class="mono">class="buy"</span> — the workhorse.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3><span class="mono">#price</span></h3><p>The one <span class="mono">id="price"</span>.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3><span class="mono">.ticket button</span></h3><p>Buttons inside <span class="mono">.ticket</span> (descendant).</p></div></div>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:36px;"><span><strong>Mental model:</strong> CSS = select, then declare.</span></div>
+</section>
+
+<!-- The box model -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>The web platform · padding vs margin</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Padding vs margin</h2>
+  <p class="lead rise" style="margin-bottom:44px;">The single distinction that clears up most early layout confusion — side by side.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:20px;">
+      <h3 style="font-size:34px;font-weight:600;">Padding</h3>
+      <p style="font-size:26px;" class="dim">the space <strong style="color:var(--aqx-brand)">INSIDE</strong> the border</p>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px;">
+        <div class="bullet"><div class="dot"></div><div><p>Space between <strong>content and border</strong>.</p></div></div>
+        <div class="bullet"><div class="dot"></div><div><p>Background color <strong>extends into it</strong>.</p></div></div>
+        <div class="bullet"><div class="dot"></div><div><p>Makes the element <strong>bigger</strong>.</p></div></div>
+      </div>
+      <!-- padding figure: content sits inside a coloured padding band, all within the border -->
+      <div style="margin-top:auto;border:3px solid var(--aqx-text-primary);border-radius:10px;background:var(--aqx-surface-selected);padding:34px;position:relative;">
+        <span style="position:absolute;top:8px;left:14px;font-size:19px;font-weight:700;color:var(--aqx-brand-hover);letter-spacing:.5px;">padding</span>
+        <div style="background:var(--aqx-brand);color:#fff;border-radius:6px;padding:22px;text-align:center;font-size:24px;font-weight:700;">content</div>
+      </div>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:20px;">
+      <h3 style="font-size:34px;font-weight:600;">Margin</h3>
+      <p style="font-size:26px;" class="dim">the space <strong style="color:var(--aqx-brand)">OUTSIDE</strong> the border</p>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px;">
+        <div class="bullet"><div class="dot"></div><div><p>Space between this element and <strong>other elements</strong>.</p></div></div>
+        <div class="bullet"><div class="dot"></div><div><p><strong>Transparent</strong> — no background.</p></div></div>
+        <div class="bullet"><div class="dot"></div><div><p>Vertical margins between blocks <strong>can collapse</strong>.</p></div></div>
+      </div>
+      <!-- margin figure: two solid boxes with a transparent gap (margin) between them -->
+      <div style="margin-top:auto;display:flex;flex-direction:column;align-items:stretch;gap:0;">
+        <div style="background:var(--aqx-brand);color:#fff;border-radius:8px;padding:20px;text-align:center;font-size:23px;font-weight:700;">this element</div>
+        <div style="border-left:2px dashed var(--aqx-border-strong);border-right:2px dashed var(--aqx-border-strong);margin:0 auto;width:70%;padding:14px 0;text-align:center;font-size:19px;font-weight:700;color:var(--aqx-text-secondary);letter-spacing:.5px;">margin ↕</div>
+        <div style="border:2px solid var(--aqx-text-primary);color:var(--aqx-text-primary);border-radius:8px;padding:20px;text-align:center;font-size:23px;font-weight:700;background:#fff;">other element</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JavaScript & the one thread -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>The web platform · JavaScript</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">JavaScript &amp; the one thread</h2>
+  <p class="lead rise" style="margin-bottom:48px;">JS reads input, runs logic, updates the DOM — and it runs on a single thread, one thing at a time.</p>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:20px;align-items:center;margin-bottom:48px;">
+    <div class="card rise" style="padding:30px 26px;text-align:center;"><h3 style="font-size:28px;font-weight:600;">Button click</h3></div>
+    <span style="font-size:40px;color:var(--aqx-brand);font-weight:700;">→</span>
+    <div class="card rise" style="padding:30px 26px;text-align:center;"><h3 style="font-size:28px;font-weight:600;">JS function runs</h3></div>
+    <span style="font-size:40px;color:var(--aqx-brand);font-weight:700;">→</span>
+    <div class="card rise" style="padding:30px 26px;text-align:center;"><h3 style="font-size:28px;font-weight:600;">Changes the DOM</h3></div>
+    <span style="font-size:40px;color:var(--aqx-brand);font-weight:700;">→</span>
+    <div class="card rise" style="padding:30px 26px;text-align:center;"><h3 style="font-size:28px;font-weight:600;">Screen updates</h3></div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> JS in the browser is single-threaded. Slow work (API calls) is done <strong>asynchronously</strong>: fire the request, get a <span class="mono">Promise</span> (a placeholder for a value arriving later), keep going.</span></div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:24px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> Never block the one thread. A slow synchronous loop freezes the <em>whole</em> page — clicks, scrolling, animation — until it finishes.</span>
+  </div>
+</section>
+
+    <!-- 1.5 dividing line -->
+    <section class="slide divider">
+  <span class="kick">Section 02</span>
+  <span class="num">02</span>
+  <h2 style="margin:0 0 28px;">React fundamentals</h2>
+  <p class="lead" style="font-size:34px;">UI = f(state). Change the data, React redraws — the render lifecycle, hooks, state and where it should live.</p>
+</section>
+
+<!-- 2.1 What is React? UI = f(state) -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · mental model</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">What is React? UI = f(state)</h2>
+  <p class="lead rise" style="margin-bottom:48px;">A component is a function that returns UI. You change the data; React re-runs the function and updates the screen. You describe the destination — React does the driving.</p>
+  <div style="display:flex;align-items:center;gap:30px;margin-bottom:44px;">
+    <div class="card rise" style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">state (data)</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">The single source of truth you own and change.</p>
+    </div>
+    <span style="font-size:52px;color:var(--aqx-brand);font-weight:300;">→</span>
+    <div class="card rise" style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">f( ) — the component</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">A function that turns the current data into markup.</p>
+    </div>
+    <span style="font-size:52px;color:var(--aqx-brand);font-weight:300;">→</span>
+    <div class="card rise" style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">UI on screen</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">React diffs the new tree and patches only what changed.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> UI = f(state). Change the data; React redraws. Re-running functions is cheap; touching the real DOM is the expensive part, so React minimizes it via the virtual DOM.</span></div>
+</section>
+
+<!-- 2.2 Follow one interaction, end to end — THE SPINE -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · the spine</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 20px;">Follow one interaction, end to end</h2>
+  <p class="lead rise" style="margin-bottom:52px;">A user taps <strong>Buy</strong> — here is every stop that tap makes before the screen updates.</p>
+  <div class="journey rise" style="margin-bottom:52px;">
+    <div class="stop"><div class="ic">◻</div><div class="lb">Click</div><div class="sub">the tap</div></div>
+    <div class="arw">→</div>
+    <div class="stop"><div class="ic">⇄</div><div class="lb">Event</div><div class="sub">handler</div></div>
+    <div class="arw">→</div>
+    <div class="stop"><div class="ic">✦</div><div class="lb">State</div><div class="sub">useState</div></div>
+    <div class="arw">→</div>
+    <div class="stop"><div class="ic">▦</div><div class="lb">Re-render</div><div class="sub">UI = f(state)</div></div>
+    <div class="arw">→</div>
+    <div class="stop"><div class="ic">◲</div><div class="lb">DOM patch</div><div class="sub">virtual DOM</div></div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> this is the whole talk in one diagram. Every later slide zooms into exactly one of these stops — hold the spine and the rest slots in.</span></div>
+</section>
+
+<!-- 2.3 The virtual DOM — cheap redraws -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · virtual DOM</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 16px;">Why the virtual DOM — cheap redraws</h2>
+  <p class="lead rise" style="margin-bottom:30px;font-size:28px;">Touching the <strong>real DOM</strong> is the expensive part. Old-school code hits it constantly; React hits it as little as possible.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:stretch;min-height:0;">
+
+    <!-- OLD SCHOOL -->
+    <div class="card rise" style="padding:26px 34px;display:flex;flex-direction:column;gap:12px;border-color:var(--aqx-negative);background:var(--aqx-negative-soft);">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="badge" style="color:var(--aqx-negative);background:#fff;border:1px solid var(--aqx-negative);">Old-school</span>
+        <span style="font-size:22px;font-weight:800;letter-spacing:1px;color:#fff;background:var(--aqx-negative);border-radius:6px;padding:5px 16px;">🐌 SLOW</span>
+      </div>
+      <h3 style="font-size:28px;font-weight:700;">Hand-write DOM updates</h3>
+      <div style="background:#fff;border:1px solid var(--aqx-border);border-radius:8px;padding:14px 20px;font-size:24px;font-weight:600;">Data changes</div>
+      <div style="text-align:center;font-size:22px;color:var(--aqx-negative);margin:-4px 0;">↓</div>
+      <div style="background:#fff;border:1px solid var(--aqx-border);border-radius:8px;padding:14px 20px;font-size:24px;font-weight:600;">Find &amp; edit real DOM nodes by hand<br><span style="font-size:20px;font-weight:400;" class="dim">— or rebuild the whole subtree</span></div>
+      <div style="text-align:center;font-size:22px;color:var(--aqx-negative);margin:-4px 0;">↓</div>
+      <div style="background:var(--aqx-negative);color:#fff;border-radius:8px;padding:14px 20px;font-size:24px;font-weight:700;">Browser re-lays-out far more than changed</div>
+    </div>
+
+    <!-- REACT -->
+    <div class="card rise" style="padding:26px 34px;display:flex;flex-direction:column;gap:12px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="badge stack" style="align-self:auto;">React</span>
+        <span style="font-size:22px;font-weight:800;letter-spacing:1px;color:#fff;background:var(--aqx-positive);border-radius:6px;padding:5px 16px;">⚡ FAST</span>
+      </div>
+      <h3 style="font-size:28px;font-weight:700;">Diff a virtual DOM, patch the delta</h3>
+      <div style="background:#fff;border:1px solid var(--aqx-border);border-radius:8px;padding:14px 20px;font-size:24px;font-weight:600;"><span class="mono" style="font-size:.85em;">setState</span> → re-run component<br><span style="font-size:20px;font-weight:400;" class="dim">fresh in-memory tree — cheap</span></div>
+      <div style="text-align:center;font-size:22px;color:var(--aqx-brand-hover);margin:-4px 0;">↓</div>
+      <div style="background:#fff;border:1px solid var(--aqx-border);border-radius:8px;padding:14px 20px;font-size:24px;font-weight:600;">Diff new virtual tree vs old<br><span style="font-size:20px;font-weight:400;" class="dim">reconciliation — all in memory</span></div>
+      <div style="text-align:center;font-size:22px;color:var(--aqx-brand-hover);margin:-4px 0;">↓</div>
+      <div style="background:var(--aqx-brand);color:#fff;border-radius:8px;padding:14px 20px;font-size:24px;font-weight:700;">Patch only the nodes that changed</div>
+    </div>
+
+  </div>
+  <div class="rise" style="background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:18px 30px;margin-top:24px;">
+    <span style="font-size:24px;line-height:1.45;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> the diff compares <strong>references</strong> — mutating in place keeps the same reference, so React skips the redraw. Hand it a new object: <span class="mono">{ ...order }</span>, not <span class="mono">order.qty = 1</span>.</span>
+  </div>
+</section>
+
+<!-- 2.4 JavaScript essentials -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · TypeScript</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Why TypeScript?</h2>
+  <p class="lead rise" style="margin-bottom:44px;">JavaScript <strong>plus type annotations</strong>, checked at build then erased — the browser runs plain JS, so it costs nothing at runtime. All our code is TypeScript.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Catch shape mistakes</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">A wrong field or invalid <span class="mono">side</span> is a compile error, not a prod incident — a mispriced order caught before it ships.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Safety net you expect</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">The same typed guarantee you rely on server-side, now on the frontend.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Live documentation</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">Hover + autocomplete teach an API as you type — how a monorepo team stays consistent.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Refactor with confidence</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">Rename a field and the compiler <strong>lists every place</strong> to update.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Free at runtime</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">Types are erased at build — no performance cost.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;background:var(--aqx-surface-selected);">
+      <h3 style="font-size:32px;font-weight:600;color:var(--aqx-brand-hover);">Spell-check for data</h3>
+      <p style="font-size:25px;line-height:1.45;" class="dim">Describe a shape once; the compiler verifies every use of it, forever — for free.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2.8 TypeScript — spell-check for data shapes -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · TypeScript</span></div>
+  <h2 class="h2 rise" style="margin:32px 0 18px;">TypeScript — spell-check for data shapes</h2>
+  <p class="lead rise" style="margin-bottom:36px;">Describe your data's shape once; the compiler verifies every usage, forever.</p>
+  <div class="code rise" style="align-self:stretch;">
+    <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">order.ts</span></div>
+<pre style="font-size:26px;line-height:1.6;"><span class="kw">type</span> Order = {
+  id: <span class="kw">string</span>;
+  side: <span class="str">'buy'</span> | <span class="str">'sell'</span>;   <span class="cmt">// union: exactly one of these</span>
+  price: <span class="kw">number</span>;
+  qty: <span class="kw">number</span>;
+  note?: <span class="kw">string</span>;          <span class="cmt">// ? = optional field</span>
+};
+<span class="kw">function</span> <span class="fn">getJson</span>&lt;T&gt;(url: <span class="kw">string</span>): Promise&lt;T&gt; { <span class="cmt">/* generic */</span> }
+<span class="fn">notional</span>({ id: <span class="str">'a1'</span>, side: <span class="str">'hold'</span>, price: 67000 });
+<span class="warn">// ❌ 'hold' is not 'buy' | 'sell'  ·  missing property: qty</span></pre>
+  </div>
+  <div class="rule-chip rise" style="margin-top:26px;"><span><strong><span class="mono">interface</span> vs <span class="mono">type</span>:</strong> both describe an object's shape — use <span class="mono">interface</span> for objects you may extend, <span class="mono">type</span> for everything else (unions, primitives, generics).</span></div>
+</section>
+
+<!-- 2.9 What is JSX? -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · JSX</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">What is JSX?</h2>
+  <p class="lead rise" style="margin-bottom:40px;">HTML-like syntax <strong>inside JavaScript</strong>. It isn't HTML — the bundler compiles every tag into <span class="mono">React.createElement</span>, which builds a virtual-DOM node.</p>
+  <div style="display:flex;align-items:center;gap:26px;margin-bottom:36px;">
+    <div class="card rise" style="flex:1;padding:30px 34px;">
+      <p style="font-size:25px;line-height:1.4;" class="dim">you write JSX</p>
+      <p class="mono" style="font-size:26px;margin-top:8px;">&lt;td&gt;{pnl}&lt;/td&gt;</p>
+    </div>
+    <span style="font-size:44px;color:var(--aqx-brand);font-weight:300;">→</span>
+    <div class="card rise" style="flex:1.3;padding:30px 34px;">
+      <p style="font-size:25px;line-height:1.4;" class="dim">the bundler compiles it to JS</p>
+      <p class="mono" style="font-size:24px;margin-top:8px;">React.createElement('td', null, pnl)</p>
+    </div>
+    <span style="font-size:44px;color:var(--aqx-brand);font-weight:300;">→</span>
+    <div class="card rise" style="flex:1;padding:30px 34px;">
+      <p style="font-size:25px;line-height:1.4;" class="dim">React builds</p>
+      <p class="mono" style="font-size:26px;margin-top:8px;">a vDOM node</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:32px;">
+    <div class="bullet rise"><div class="dot"></div><div><h3>It's JS, not HTML</h3><p><span class="mono">className</span> not <span class="mono">class</span>, <span class="mono">onClick</span> not <span class="mono">onclick</span> — <span class="mono">class</span> and <span class="mono">for</span> are reserved words.</p></div></div>
+    <div class="bullet rise"><div class="dot"></div><div><h3>Every tag closes, one root</h3><p>Self-close <span class="mono">&lt;br /&gt;</span>. An expression yields one value, so return a single root — wrap siblings in a fragment <span class="mono">&lt;&gt;…&lt;/&gt;</span>.</p></div></div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> the extension tells you the language — <span class="mono">.jsx</span> is JS with tags, <span class="mono">.tsx</span> is TypeScript with tags. All our components are <span class="mono">.tsx</span>: typed, plus JSX.</span></div>
+</section>
+
+<!-- 2.10 Components & JSX -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · components</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 14px;">Anatomy of a component</h2>
+  <p class="lead rise" style="margin-bottom:28px;font-size:27px;">A component is just a <strong>function</strong> — logic at the top, and whatever it <strong>returns</strong> is the UI. Use it like a tag; a big screen is a tree of them.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:start;min-height:0;">
+
+    <!-- annotated code -->
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">PositionRow.tsx</span></div>
+<pre style="font-size:23px;line-height:1.7;"><span class="kw">function</span> <span class="fn">PositionRow</span>({ symbol, pnl }) {  <span class="cmt">// ① fn + ② name</span>
+  <span class="kw">const</span> color = pnl &gt;= <span class="str">0</span> ? <span class="str">'green'</span> : <span class="str">'red'</span>;  <span class="cmt">// ③ logic</span>
+
+  <span class="kw">return</span> (                            <span class="cmt">// ④ return = UI</span>
+    <span class="tag">&lt;tr&gt;</span>
+      <span class="tag">&lt;td&gt;</span>{symbol}<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;td</span> <span class="attr">style</span>={{ color }}<span class="tag">&gt;</span>{pnl}<span class="tag">&lt;/td&gt;</span>
+    <span class="tag">&lt;/tr&gt;</span>
+  );
+}</pre>
+    </div>
+
+    <!-- anatomy breakdown -->
+    <div style="display:flex;flex-direction:column;gap:13px;">
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:26px;"><span style="color:var(--aqx-brand)">①</span> A <span class="mono">function</span></h3><p style="font-size:22px;">A component is declared with the <span class="mono">function</span> keyword (or an arrow fn).</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:26px;"><span style="color:var(--aqx-brand)">②</span> A <strong>CamelCase</strong> name</h3><p style="font-size:22px;">Must start uppercase — <span class="mono">PositionRow</span>, not <span class="mono">positionRow</span>. That's how React tells a component from a plain HTML tag.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:26px;"><span style="color:var(--aqx-brand)">③</span> Body = logic</h3><p style="font-size:22px;">Variables, hooks, helpers — the plain JS that runs each render, before the return.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:26px;"><span style="color:var(--aqx-brand)">④</span> <span class="mono">return</span> is the UI</h3><p style="font-size:22px;">Whatever JSX it returns is what shows on screen — <strong>one root element</strong>.</p></div></div>
+    </div>
+  </div>
+
+  <!-- how components are organized -->
+  <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:8px;padding:18px 32px;margin-top:22px;">
+    <div style="display:flex;align-items:baseline;gap:16px;">
+      <span style="font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--aqx-text-secondary);white-space:nowrap;">Organized as</span>
+      <span class="mono" style="font-size:21px;line-height:1.5;color:var(--aqx-text-primary);">PositionsTable/<br>&nbsp;&nbsp;index.tsx&nbsp;&nbsp;<span class="dim">// the component</span><br>&nbsp;&nbsp;PositionRow.tsx&nbsp;&nbsp;<span class="dim">// sub-component</span><br>&nbsp;&nbsp;styles.ts</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:16px;">
+      <span style="font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--aqx-text-secondary);white-space:nowrap;">Composed as</span>
+      <span class="mono" style="font-size:21px;line-height:1.5;color:var(--aqx-text-primary);">&lt;PositionsTable&gt;<br>&nbsp;&nbsp;&lt;<strong style="color:var(--aqx-brand-hover)">PositionRow</strong> …/&gt; ×N<br>&lt;/PositionsTable&gt;</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2.11 Props & composition -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · props</span></div>
+  <h2 class="h2 rise" style="margin:32px 0 18px;">Props — a component's settings</h2>
+  <p class="lead rise" style="margin-bottom:22px;">Two rules: <strong>data flows one way</strong>, parent → child.</p>
+  <!-- what a prop is -->
+  <div class="rise" style="display:flex;align-items:center;gap:22px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:8px;padding:18px 30px;margin-bottom:30px;">
+    <span style="font-family:var(--mono);font-size:28px;color:var(--aqx-text-primary);">&lt;Button <span style="background:var(--aqx-warning-soft);border:1px solid var(--aqx-warning);border-radius:5px;padding:1px 8px;font-weight:800;color:var(--aqx-text-primary);">disabled</span>={false} ...props /&gt;</span>
+    <span style="font-size:24px;" class="dim">← each <strong style="color:var(--aqx-text-primary)">name={value}</strong> is a prop. <span class="mono">disabled</span> is one.</span>
+  </div>
+  <!-- two snippets side by side -->
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <span class="badge stack" style="align-self:flex-start;">Parent — passes props down</span>
+      <div class="code rise">
+        <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">OrderTicket.tsx</span></div>
+<pre style="font-size:24px;"><span class="tag">&lt;Button</span>
+  <span class="attr">disabled</span>={qty === 0}
+  <span class="attr">label</span>=<span class="str">"Buy"</span>
+  <span class="attr">onPress</span>={placeOrder}
+<span class="tag">/&gt;</span></pre>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <span class="badge stack" style="align-self:flex-start;">Child — receives &amp; uses them</span>
+      <div class="code rise">
+        <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">Button.tsx</span></div>
+<pre style="font-size:24px;"><span class="kw">function</span> <span class="fn">Button</span>({ disabled, label, onPress }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;button</span>
+      <span class="attr">disabled</span>={disabled}
+      <span class="attr">onClick</span>={onPress}
+    <span class="tag">&gt;</span>{label}<span class="tag">&lt;/button&gt;</span>
+  );
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- 2.13 What is a hook? -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · lifecycle</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 14px;">The lifecycle flow</h2>
+  <p class="lead rise" style="margin-bottom:26px;font-size:28px;">How <span class="mono">useState</span> and <span class="mono">useEffect</span> play out over a component's life — a state update loops it back through render.</p>
+
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 0.85fr;gap:150px;align-items:start;min-height:0;">
+
+    <!-- LEFT: the flow -->
+    <div style="display:flex;">
+      <!-- steps -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:9px;">
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-brand);min-width:34px;">1</span>
+          <div><h3 style="font-size:24px;font-weight:700;">Mount</h3><p style="font-size:20px;margin:0;" class="dim">Component added to the DOM, rendered the first time.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-brand);min-width:34px;">2</span>
+          <div><h3 style="font-size:24px;font-weight:700;"><span class="mono" style="font-size:.85em;">useState</span> — initialize</h3><p style="font-size:20px;margin:0;" class="dim">The initial state value is set.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-positive-soft);border:1px solid var(--aqx-positive);border-left:6px solid var(--aqx-positive);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-positive);min-width:34px;">3</span>
+          <div><h3 style="font-size:24px;font-weight:700;"><span class="mono" style="font-size:.85em;">useEffect</span> — after render</h3><p style="font-size:20px;margin:0;" class="dim">Runs after paint. Good for: API calls, subscriptions, listeners.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-warning-soft);border:1px solid var(--aqx-warning);border-left:6px solid var(--aqx-warning);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-warning-strong);min-width:34px;">4</span>
+          <div><h3 style="font-size:24px;font-weight:700;">State update</h3><p style="font-size:20px;margin:0;" class="dim">A user action / async call → you call <span class="mono">setState(next)</span>.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-surface-selected);border:1px solid var(--aqx-brand);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-brand);min-width:34px;">5</span>
+          <div><h3 style="font-size:24px;font-weight:700;">Re-render</h3><p style="font-size:20px;margin:0;" class="dim">The function runs again from the top with the new state.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-positive-soft);border:1px solid var(--aqx-positive);border-left:6px solid var(--aqx-positive);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-positive);min-width:34px;">6</span>
+          <div><h3 style="font-size:24px;font-weight:700;"><span class="mono" style="font-size:.85em;">useEffect</span> — again</h3><p style="font-size:20px;margin:0;" class="dim">Re-runs only if its dependencies changed.</p></div>
+        </div>
+        <div style="text-align:center;color:var(--aqx-border-strong);font-size:16px;line-height:.6;">↓</div>
+        <div class="rise" style="display:flex;align-items:center;gap:18px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-left:6px solid var(--aqx-negative);border-radius:8px;padding:12px 20px;">
+          <span style="font-size:26px;font-weight:800;color:var(--aqx-negative);min-width:34px;">7</span>
+          <div><h3 style="font-size:24px;font-weight:700;">Unmount</h3><p style="font-size:20px;margin:0;" class="dim">Removed from the DOM — the effect's cleanup runs.</p></div>
+        </div>
+      </div>
+      <!-- loop-back rail — on the RIGHT of the steps, spanning step 5 (re-render) back up to step 3 (useEffect) -->
+      <div style="display:flex;flex-direction:column;align-items:center;margin-left:14px;padding-top:200px;padding-bottom:280px;">
+        <span style="color:var(--aqx-brand);font-size:22px;margin-bottom:-4px;">▲</span>
+        <div style="flex:1;border-right:3px dashed var(--aqx-brand);border-top:3px dashed var(--aqx-brand);border-bottom:3px dashed var(--aqx-brand);border-radius:0 14px 14px 0;width:26px;position:relative;">
+          <span style="position:absolute;top:50%;right:-124px;transform:translateY(-50%);width:116px;font-size:17px;font-weight:700;color:var(--aqx-brand-hover);line-height:1.25;text-align:left;">state update<br>triggers re-render</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: takeaways -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card rise" style="padding:26px 30px;display:flex;flex-direction:column;gap:14px;">
+        <h3 style="font-size:26px;font-weight:700;">The three rules</h3>
+        <div class="bullet"><div class="dot" style="margin-top:10px;"></div><div><p style="font-size:23px;line-height:1.4;">A <strong>state setter</strong> is the only thing that restarts the loop (steps 4 → 5).</p></div></div>
+        <div class="bullet"><div class="dot" style="margin-top:10px;"></div><div><p style="font-size:23px;line-height:1.4;"><span class="mono">useEffect</span> runs <strong>after</strong> render — after the UI is painted, never during.</p></div></div>
+        <div class="bullet"><div class="dot" style="margin-top:10px;"></div><div><p style="font-size:23px;line-height:1.4;">Clean up side effects in the effect's <strong>return</strong> function.</p></div></div>
+      </div>
+      <div class="rule-chip rise"><span><strong>Mental model:</strong> render first · effects after paint · cleanup before the next effect and at unmount. Keep the dependency array accurate to avoid bugs.</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 2.24b Why useState? plain variables don't redraw -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useState</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 14px;">Why useState? — a plain variable won't redraw</h2>
+  <p class="lead rise" style="margin-bottom:30px;font-size:27px;">A component re-runs top to bottom every render, so a plain <span class="mono">let</span> resets — and reassigning it never tells React anything. <strong>State is the memory React keeps; its setter is what schedules the redraw.</strong></p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;min-height:0;">
+
+    <!-- WRONG -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <span class="badge" style="align-self:flex-start;color:var(--aqx-negative);background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);">❌ Screen stays 3</span>
+      <div class="code rise">
+        <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">plain variable</span></div>
+<pre style="font-size:24px;line-height:1.55;"><span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">let</span> a = <span class="str">3</span>;
+  <span class="kw">const</span> <span class="fn">onClick</span> = () =&gt; {
+    a = <span class="str">5</span>;   <span class="warn">// React never knows</span>
+  };
+  <span class="cmt">// a changed, but no re-render</span>
+  <span class="cmt">// is scheduled — screen frozen</span>
+}</pre>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <span class="badge stack" style="align-self:flex-start;">✅ Screen updates to 5</span>
+      <div class="code rise" style="box-shadow:var(--aqx-shadow-md);">
+        <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">useState</span></div>
+<pre style="font-size:24px;line-height:1.55;"><span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">const</span> [a, setA] = <span class="fn">useState</span>(<span class="str">3</span>);
+  <span class="kw">const</span> <span class="fn">onClick</span> = () =&gt; {
+    <span class="fn">setA</span>(<span class="str">5</span>);   <span class="cmt">// schedules re-render</span>
+  };
+  <span class="cmt">// stores value AND re-runs the</span>
+  <span class="cmt">// function → UI redraws with 5</span>
+}</pre>
+      </div>
+    </div>
+
+  </div>
+  <div class="rule-chip rise" style="margin-top:26px;"><span><strong>Mental model:</strong> changing data is not enough — only a <strong>state setter</strong> triggers a re-render. If the screen should change, it must be state.</span></div>
+</section>
+
+<!-- 2.25 Local vs global state -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useState</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">useState — the updater function</h2>
+  <p class="lead rise" style="margin-bottom:40px;">State is a <strong>snapshot per render</strong> and updates are <strong>batched</strong> — so three <span class="mono">+1</span> calls that read the bare value all read the same start and land on <span class="mono">+1</span>, not <span class="mono">+3</span>.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">❌ stale — reads a snapshot</span></div>
+<pre style="font-size:23px;"><span class="cmt">// count is 0 this render</span>
+<span class="fn">setCount</span>(count + 1);
+<span class="fn">setCount</span>(count + 1);
+<span class="fn">setCount</span>(count + 1);
+<span class="warn">// all read 0 → count = 1</span>
+
+<span class="cmt">// React batches these;</span>
+<span class="cmt">// count is frozen per render</span></pre>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">✅ updater — reads the latest</span></div>
+<pre style="font-size:23px;"><span class="fn">setCount</span>((prev) =&gt; prev + 1);
+<span class="fn">setCount</span>((prev) =&gt; prev + 1);
+<span class="fn">setCount</span>((prev) =&gt; prev + 1);
+<span class="cmt">// chains → count = 3</span>
+
+<span class="cmt">// lazy init — runs once:</span>
+<span class="kw">const</span> [rows, setRows] =
+  <span class="fn">useState</span>(() =&gt; <span class="fn">parse</span>(csv));</pre>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:32px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> when the next state <strong>depends on the previous</strong> — counters, toggles, appending, accumulating ticks — use <span class="mono">setX(prev =&gt; …)</span>, never <span class="mono">setX(x + 1)</span>.</span>
+  </div>
+</section>
+
+<!-- 2.17 useEffect — side effects -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useEffect</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">useEffect — side effects</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Rendering only computes markup. Anything touching the outside world — fetching, a WebSocket, a timer — is a side effect and lives in <span class="mono">useEffect</span>. The returned function is the cleanup.</p>
+  <div class="code rise">
+    <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">ticker.tsx</span></div>
+<pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> ws = <span class="fn">connectTicker</span>(symbol, setPrice);  <span class="cmt">// the effect</span>
+  <span class="kw">return</span> () =&gt; ws.<span class="fn">close</span>();                     <span class="cmt">// the cleanup</span>
+}, [symbol]);  <span class="cmt">// deps: re-run only when symbol changes</span></pre>
+  </div>
+  <table class="aqx" style="margin-top:32px;">
+    <thead><tr><th style="width:26%;">Dependency array</th><th>When the effect runs</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><span class="mono">[]</span></td><td>Once, after mount. Cleanup at unmount. For one-time setup</td></tr>
+      <tr><td class="k"><span class="mono">[symbol]</span></td><td>After mount, and again whenever <span class="mono">symbol</span> changes (cleanup runs between)</td></tr>
+      <tr><td>omitted</td><td>After <em>every</em> render — almost always a bug (<span class="mono">exhaustive-deps</span> catches it)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 2.18 useEffect — fetching from the network -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useEffect</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">useEffect — fetching from the network</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Run the async call in the effect, store the result in state, re-run when the inputs change. Learn the shape to see what's under the hood — then reach for React Query.</p>
+  <div class="code rise">
+    <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">fetch-in-effect.tsx</span></div>
+<pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">let</span> active = <span class="kw">true</span>;                        <span class="cmt">// race guard</span>
+  <span class="fn">setStatus</span>(<span class="str">'loading'</span>);
+  <span class="fn">fetchPositions</span>(symbol)
+    .<span class="fn">then</span>((data) =&gt; { <span class="kw">if</span> (active) <span class="fn">setRows</span>(data); })   <span class="cmt">// ignore if stale</span>
+    .<span class="fn">catch</span>(() =&gt; { <span class="kw">if</span> (active) <span class="fn">setStatus</span>(<span class="str">'error'</span>); });
+  <span class="kw">return</span> () =&gt; { active = <span class="kw">false</span>; };        <span class="cmt">// cleanup on change/unmount</span>
+}, [symbol]);                            <span class="cmt">// re-fetch when symbol changes</span></pre>
+  </div>
+</section>
+
+<!-- 2.19 useRef — the mutable box -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useRef</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">useRef — the mutable box</h2>
+  <p class="lead rise" style="margin-bottom:40px;">A ref is a mutable box (<span class="mono">.current</span>) React keeps for the component's life. Changing it does <strong>not</strong> re-render, and the value survives every render.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">a DOM handle</span></div>
+<pre style="font-size:23px;"><span class="kw">const</span> inputRef = <span class="fn">useRef</span>(<span class="kw">null</span>);
+
+<span class="cmt">// focus it after mount</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  inputRef.current?.<span class="fn">focus</span>();
+}, []);
+
+<span class="tag">&lt;input</span> <span class="attr">ref</span>={inputRef} <span class="tag">/&gt;</span></pre>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">a value that shouldn't re-render</span></div>
+<pre style="font-size:23px;"><span class="kw">const</span> timer = <span class="fn">useRef</span>(<span class="kw">null</span>);
+
+timer.current = <span class="fn">setInterval</span>(tick, 1000);
+<span class="cmt">// ...later, to stop it:</span>
+<span class="fn">clearInterval</span>(timer.current);
+
+<span class="cmt">// changing .current does</span>
+<span class="cmt">// NOT trigger a re-render</span></pre>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:32px;"><span><strong>Mental model:</strong> if changing the value should update the screen → <span class="mono">useState</span>. If it's just bookkeeping the UI doesn't react to (timer ids, DOM nodes, socket handles, "already ran" flags) → <span class="mono">useRef</span>. Never touch <span class="mono">.current</span> during render — only in effects and handlers.</span></div>
+</section>
+
+<!-- 2.20 The everyday hook kit -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · useMemo &amp; useCallback</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">useMemo &amp; useCallback — cache across renders</h2>
+  <p class="lead rise" style="margin-bottom:40px;">A component re-runs top to bottom every render, so every value and function it defines is rebuilt. These cache a computed <strong>value</strong> and a function's <strong>identity</strong>.</p>
+  <div class="code rise">
+    <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">memo.tsx</span></div>
+<pre style="font-size:23px;"><span class="cmt">// useMemo: filter + sort ONLY when rows or query change</span>
+<span class="kw">const</span> visible = <span class="fn">useMemo</span>(
+  () =&gt; rows.<span class="fn">filter</span>((p) =&gt; p.symbol.<span class="fn">includes</span>(query))
+            .<span class="fn">sort</span>((a, b) =&gt; b.pnl - a.pnl),
+  [rows, query]
+);
+
+<span class="cmt">// useCallback: same identity, so a memo'd Row skips re-renders</span>
+<span class="kw">const</span> onPick = <span class="fn">useCallback</span>((symbol) =&gt; <span class="fn">setSelected</span>(symbol), []);</pre>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:32px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> React 19 + the React Compiler auto-memoize at build time. Reach for these <strong>far less</strong> — only where the Profiler shows a real hot spot. Don't sprinkle them just in case.</span>
+  </div>
+</section>
+
+<!-- 2.22 Conditional rendering & lists -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · hooks</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">The everyday hook kit</h2>
+  <p class="lead rise" style="margin-bottom:40px;">The rest of the kit — each hook doing one job. Custom hooks combine these and are the backbone of our MVVM.</p>
+  <table class="aqx">
+    <tbody>
+      <tr><td class="k" style="width:26%;">useState</td><td>Give the component memory that survives re-renders</td></tr>
+      <tr><td class="k">useEffect</td><td>Reach outside — fetch, subscribe, timers; return a cleanup</td></tr>
+      <tr><td class="k">useRef</td><td>A mutable box that survives renders <em>without</em> causing them — timers, DOM handles</td></tr>
+      <tr><td class="k">useMemo</td><td>Remember the result of an expensive calculation until its inputs change</td></tr>
+      <tr><td class="k">useCallback</td><td>Remember a function itself, so it stays the "same" reference across renders</td></tr>
+      <tr><td class="k">useContext</td><td>Read a shared value provided higher up the tree</td></tr>
+    </tbody>
+  </table>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:34px;"><span><strong>Rule of thumb:</strong> <span class="mono">useMemo</span>/<span class="mono">useCallback</span> are manual memoization. The React Compiler (React 19) auto-memoizes at build time — reach for them far less, only where the Profiler shows a real hot spot.</span></div>
+</section>
+
+<!-- 2.21 useMemo & useCallback -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · worked example</span></div>
+  <h2 class="h2 rise" style="margin:32px 0 16px;">One component, five hooks</h2>
+  <p class="lead rise" style="margin-bottom:34px;">A tiny search box — each hook doing its one job.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:60px;align-items:start;min-height:0;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">SearchBox.tsx</span></div>
+<pre style="font-size:24px;line-height:1.6;"><span class="kw">const</span> [q, setQ] = <span class="fn">useState</span>(<span class="str">''</span>);        <span class="cmt">// ①</span>
+<span class="kw">const</span> ref = <span class="fn">useRef</span>(<span class="kw">null</span>);              <span class="cmt">// ②</span>
+
+<span class="fn">useEffect</span>(() =&gt; ref.current.<span class="fn">focus</span>(), []); <span class="cmt">// ③</span>
+
+<span class="kw">const</span> hits = <span class="fn">useMemo</span>(() =&gt;             <span class="cmt">// ④</span>
+  items.<span class="fn">filter</span>(i =&gt; i.<span class="fn">includes</span>(q)), [q]);
+
+<span class="kw">const</span> pick = <span class="fn">useCallback</span>(               <span class="cmt">// ⑤</span>
+  (s) =&gt; <span class="fn">onPick</span>(s), []);</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;"><span style="color:var(--aqx-brand)">①</span> <span class="mono">useState</span></h3><p style="font-size:23px;">memory — the value React keeps + a setter.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;"><span style="color:var(--aqx-brand)">②</span> <span class="mono">useRef</span></h3><p style="font-size:23px;">a box that survives renders without redrawing.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;"><span style="color:var(--aqx-brand)">③</span> <span class="mono">useEffect</span></h3><p style="font-size:23px;">talk to the outside — here, focus on mount.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;"><span style="color:var(--aqx-brand)">④</span> <span class="mono">useMemo</span></h3><p style="font-size:23px;">derive a value, recompute only when deps change.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;"><span style="color:var(--aqx-brand)">⑤</span> <span class="mono">useCallback</span></h3><p style="font-size:23px;">a stable function reference across renders.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2.24 The same panel, on a timeline -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · state placement</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Local vs global state</h2>
+  <p class="lead rise" style="margin-bottom:44px;">The decision you'll make over and over: where does each piece of state live?</p>
+  <table class="aqx">
+    <thead><tr><th style="width:24%;">Scope</th><th style="width:30%;">Tool</th><th>AQX Trader example</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><strong>Local</strong> — one component</td><td>useState</td><td>Is this dropdown open? Text in the qty field</td></tr>
+      <tr><td class="k"><strong>Lifted</strong> — a few siblings</td><td>Lift to the common parent</td><td>Two panels sharing the selected symbol</td></tr>
+      <tr><td class="k"><strong>Global</strong> — whole app</td><td>Store (react-reservice) or context</td><td>Session, theme, connection status</td></tr>
+    </tbody>
+  </table>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:36px;"><span><strong>Rule of thumb:</strong> as local as possible, as global as necessary. When two siblings need the same data, lifting state up is always the first move before reaching for a store.</span></div>
+</section>
+
+<!-- 2.26 The prop drilling problem -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · prop drilling</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">The prop drilling problem</h2>
+  <p class="lead rise" style="margin-bottom:40px;">The logged-in <span class="mono">user</span> lives in <span class="mono">App</span>; a tiny <span class="mono">Avatar</span> deep down needs it. Props only flow one hop at a time — so you thread it through every layer in between.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;">
+    <div class="card rise" style="padding:36px 40px;display:flex;flex-direction:column;gap:16px;background:var(--aqx-negative-soft);border-color:var(--aqx-negative);">
+      <h3 style="font-size:32px;font-weight:600;">The parcel relay</h3>
+      <div class="mono" style="font-size:24px;line-height:1.7;">
+        <div>App <span style="color:var(--aqx-brand-hover);">(has user)</span></div>
+        <div>&nbsp;└─ Layout&nbsp;&nbsp;&nbsp;<span style="color:var(--aqx-negative);">↓ user</span> <span class="dim">// unused</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;└─ Header&nbsp;<span style="color:var(--aqx-negative);">↓ user</span> <span class="dim">// unused</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ Nav&nbsp;<span style="color:var(--aqx-negative);">↓ user</span> <span class="dim">// unused</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ Avatar <span style="color:var(--aqx-brand-hover);">✓ uses user</span></div>
+      </div>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Every layer in between grows a prop it doesn't care about.</p>
+    </div>
+    <div class="card rise" style="padding:36px 40px;display:flex;flex-direction:column;gap:16px;background:var(--aqx-surface-selected);border-color:var(--aqx-brand);">
+      <h3 style="font-size:32px;font-weight:600;">The notice board</h3>
+      <div class="mono" style="font-size:24px;line-height:1.7;">
+        <div>App <span style="color:var(--aqx-brand-hover);">provides user</span> ┐</div>
+        <div>&nbsp;└─ Layout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;└─ Header&nbsp;&nbsp;&nbsp;│ <span style="color:var(--aqx-brand-hover);">context</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ Nav&nbsp;&nbsp;&nbsp;│</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ Avatar <span style="color:var(--aqx-brand-hover);">reads ◄┘</span></div>
+      </div>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Provide once at the top; read directly below — no couriers.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:32px;"><span><strong>Mental model:</strong> prop drilling = relaying a parcel hand to hand through people who don't need it. Reach for Context when a value is needed in many far-apart places — 2–3 hops of plain props is fine.</span></div>
+</section>
+
+<!-- 2.27 Global Context -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · Context</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Global Context</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Context is a <strong>notice board</strong> — pin the value once at the top of a subtree, and anyone below reads it directly with <span class="mono">useContext</span>. No courier props.</p>
+  <div class="code rise">
+    <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">UserContext.tsx</span></div>
+<pre><span class="kw">const</span> UserContext = <span class="fn">createContext</span>&lt;User | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="cmt">// at the top of a subtree:</span>
+<span class="tag">&lt;UserContext.Provider</span> <span class="attr">value</span>={user}<span class="tag">&gt;</span> <span class="tag">&lt;Layout /&gt;</span> <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+<span class="cmt">// anywhere below — no courier props:</span>
+<span class="kw">const</span> user = <span class="fn">useContext</span>(UserContext);</pre>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:32px;"><span><strong>In our stack:</strong> we manage global context with <span class="mono">react-reservice</span> — not raw Context — so components subscribe to just the <strong>slice</strong> they read (covered in Part 3).</span></div>
+</section>
+
+<!-- 2.28 Why not just Context? -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React · Context</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Why not just Context?</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Everyone reaches for Context first — but every consumer re-renders on <em>any</em> change to the value.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:16px;">
+      <span style="font-size:24px;text-transform:uppercase;letter-spacing:0.08em;color:var(--aqx-text-secondary);">useContext</span>
+      <h3 style="font-size:34px;font-weight:600;">A notice board</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Publish a value once; any child reads it. But <strong>every</strong> consumer re-renders on <em>any</em> change.</p>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Safe only for <strong>slow-changing</strong> state — session, theme, locale.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:16px;background:var(--aqx-surface-selected);border-color:var(--aqx-brand);">
+      <span style="font-size:24px;text-transform:uppercase;letter-spacing:0.08em;color:var(--aqx-brand-hover);">react-reservice</span>
+      <h3 style="font-size:34px;font-weight:600;">Subscribe to one slice</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Subscribe to <strong>one slice</strong> of the store; re-render only when <em>that</em> slice changes.</p>
+      <p style="font-size:26px;line-height:1.45;" class="dim">A price feed ticking many times a second belongs here — not on the notice board.</p>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:36px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> reach for <strong>Context</strong> when a value rarely changes; a <strong>Service</strong> for anything that <em>ticks</em>. Put a live price feed in Context and you re-render the whole subtree on every tick.</span>
+  </div>
+</section>
+
+<!-- 2.29 Styling mechanics — flexbox -->
+<section class="slide divider">
+  <span class="kick">Section 03</span>
+  <span class="num">03</span>
+  <h2 style="margin:0 0 28px;">aqx-core</h2>
+  <p class="lead" style="font-size:34px;">Our MVVM house rules — four layers, one job each, strict call direction. The View is a face you can swap; the logic underneath is what you test.</p>
+</section>
+
+<!-- 3.1 Our architecture — MVVM, AQX-style -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · MVVM</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 16px;">Our architecture — MVVM, AQX-style</h2>
+  <p class="lead rise" style="margin-bottom:40px;font-size:27px;">Five layers, strict <strong>call-direction</strong> — who is allowed to use who. Each has one job, so logic is testable without rendering.</p>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:56px;min-height:0;">
+
+    <!-- ROW: the five layers as cards, left → right -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:24px;align-items:stretch;">
+
+      <div class="card rise" style="padding:32px 28px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:34px;">📦</span><span style="font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--aqx-text-secondary);">01</span></div>
+        <h3 style="font-size:28px;font-weight:700;">Model</h3>
+        <p style="font-size:21px;line-height:1.45;" class="dim">Types, enums, constants — the data contract.</p>
+      </div>
+
+      <div class="card rise" style="padding:32px 28px;display:flex;flex-direction:column;gap:14px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:34px;">✦</span><span style="font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--aqx-brand-hover);">02</span></div>
+        <h3 style="font-size:28px;font-weight:700;">Service</h3>
+        <p style="font-size:21px;line-height:1.45;" class="dim">Source of truth — state, setters &amp; context. Used only by VC &amp; Hook.</p>
+      </div>
+
+      <div class="card rise" style="padding:32px 28px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:34px;">⚙</span><span style="font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--aqx-text-secondary);">03</span></div>
+        <h3 style="font-size:28px;font-weight:700;">ViewController</h3>
+        <p style="font-size:21px;line-height:1.45;" class="dim">Business logic — calls the API, applies rules, writes the Service.</p>
+      </div>
+
+      <div class="card rise" style="padding:32px 28px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:34px;">🪝</span><span style="font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--aqx-text-secondary);">04</span></div>
+        <h3 style="font-size:28px;font-weight:700;">Hook</h3>
+        <p style="font-size:21px;line-height:1.45;" class="dim">Thin selector — reads one slice of the Service, feeds the View.</p>
+      </div>
+
+      <div class="card rise" style="padding:32px 28px;display:flex;flex-direction:column;gap:14px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:34px;">◻</span><span style="font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--aqx-brand-hover);">05</span></div>
+        <h3 style="font-size:28px;font-weight:700;">View</h3>
+        <p style="font-size:21px;line-height:1.45;" class="dim">UI only — reads through the Hook, acts through the ViewController.</p>
+      </div>
+
+    </div>
+
+    <!-- SUMMARY: the call-direction rule -->
+    <div class="rule-chip rise" style="max-width:100%;display:flex;align-items:center;justify-content:center;gap:44px;flex-wrap:wrap;padding:30px 44px;">
+      <span style="font-size:24px;font-weight:800;color:var(--aqx-brand-hover);white-space:nowrap;">One direction:</span>
+      <span style="font-size:24px;font-weight:700;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span>View</span><span style="color:var(--aqx-brand);">→</span>
+        <span>ViewController</span><span style="color:var(--aqx-brand);">→</span>
+        <span>Service</span><span style="color:var(--aqx-brand);">→</span>
+        <span>Hook</span><span style="color:var(--aqx-brand);">→</span>
+        <span>View <span class="dim" style="font-weight:600;font-size:.82em;">(re-renders)</span></span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- 3.3 The full data lifecycle -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · data lifecycle</span></div>
+  <h2 class="h2 rise" style="margin:28px 0 12px;">The full data lifecycle — one action, full loop</h2>
+  <p class="lead rise" style="margin-bottom:16px;font-size:25px;">A single <strong>Buy</strong> press goes <em>around the loop</em> and lands back on the View, which re-renders.</p>
+
+  <div class="rise" style="flex:1;display:flex;align-items:center;justify-content:center;gap:120px;min-height:0;">
+    <!-- the circle (SVG ring + arcs, HTML nodes on top) -->
+    <div style="position:relative;width:620px;height:620px;flex-shrink:0;">
+      <svg viewBox="0 0 620 620" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;">
+        <defs>
+          <marker id="lchead" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
+            <path d="M1,1 L7.5,4.5 L1,8" fill="none" stroke="#00BCD8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <!-- four clockwise arcs, radius 230, centered at (310,310).
+             Each arc spans the GAP between two nodes so it never runs behind a card. -->
+        <path d="M 418.0,106.9 A 230,230 0 0 1 513.1,202.0" fill="none" stroke="#00BCD8" stroke-width="5" marker-end="url(#lchead)"/>
+        <path d="M 513.1,418.0 A 230,230 0 0 1 418.0,513.1" fill="none" stroke="#00BCD8" stroke-width="5" marker-end="url(#lchead)"/>
+        <path d="M 202.0,513.1 A 230,230 0 0 1 106.9,418.0" fill="none" stroke="#00BCD8" stroke-width="5" marker-end="url(#lchead)"/>
+        <path d="M 106.9,202.0 A 230,230 0 0 1 202.0,106.9" fill="none" stroke="#00BCD8" stroke-width="5" marker-end="url(#lchead)"/>
+      </svg>
+
+      <!-- center label -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+        <div style="font-size:48px;line-height:1;color:var(--aqx-brand);">↻</div>
+        <div style="font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--aqx-brand-hover);margin-top:6px;">one loop</div>
+      </div>
+
+      <!-- arrow labels (what happens ON each arrow — placed OUTSIDE the ring) -->
+      <div style="position:absolute;left:507px;top:113px;transform:translate(-50%,-50%);background:var(--aqx-ink);color:#fff;font-size:19px;font-weight:700;padding:7px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(41,47,76,.28);">1 · acts</div>
+      <div style="position:absolute;left:507px;top:507px;transform:translate(-50%,-50%);background:var(--aqx-ink);color:#fff;font-size:19px;font-weight:700;padding:7px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(41,47,76,.28);">2 · writes</div>
+      <div style="position:absolute;left:113px;top:507px;transform:translate(-50%,-50%);background:var(--aqx-ink);color:#fff;font-size:19px;font-weight:700;padding:7px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(41,47,76,.28);">3 · reads slice</div>
+      <div style="position:absolute;left:113px;top:113px;transform:translate(-50%,-50%);background:var(--aqx-brand);color:#fff;font-size:19px;font-weight:800;padding:7px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,188,216,.45);">4 · re-renders</div>
+
+      <!-- View (top) -->
+      <div class="card" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:214px;padding:18px;text-align:center;background:#fff;border-color:var(--aqx-brand);border-width:2px;box-shadow:0 0 0 6px var(--aqx-surface-selected);">
+        <div style="font-size:30px;">◻</div><div style="font-size:24px;font-weight:800;">View</div><div style="font-size:17px;" class="dim">fires the action</div>
+      </div>
+      <!-- ViewController (right) -->
+      <div class="card" style="position:absolute;top:50%;right:0;transform:translateY(-50%);width:196px;padding:18px;text-align:center;background:#fff;border-width:2px;box-shadow:0 6px 18px rgba(41,47,76,.10);">
+        <div style="font-size:30px;">⚙</div><div style="font-size:22px;font-weight:800;">ViewController</div><div style="font-size:17px;" class="dim">rules &amp; API</div>
+      </div>
+      <!-- Service (bottom) -->
+      <div class="card" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:214px;padding:18px;text-align:center;background:#fff;border-width:2px;box-shadow:0 6px 18px rgba(41,47,76,.10);">
+        <div style="font-size:30px;">✦</div><div style="font-size:24px;font-weight:800;">Service</div><div style="font-size:17px;" class="dim">writes state (truth)</div>
+      </div>
+      <!-- Hook (left) -->
+      <div class="card" style="position:absolute;top:50%;left:0;transform:translateY(-50%);width:196px;padding:18px;text-align:center;background:#fff;border-width:2px;box-shadow:0 6px 18px rgba(41,47,76,.10);">
+        <div style="font-size:30px;">🪝</div><div style="font-size:22px;font-weight:800;">Hook</div><div style="font-size:17px;" class="dim">reads the slice</div>
+      </div>
+    </div>
+
+    <!-- steps -->
+    <div style="display:flex;flex-direction:column;gap:26px;max-width:560px;">
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:25px;"><span style="color:var(--aqx-brand-hover);font-weight:800;">1 · </span><span class="mono">View → ViewController</span></h3><p style="font-size:22px;">the View fires an action — it never fetches or mutates itself.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:25px;"><span style="color:var(--aqx-brand-hover);font-weight:800;">2 · </span><span class="mono">ViewController → Service</span></h3><p style="font-size:22px;">applies rules, calls the API, writes the result via a setter.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:25px;"><span style="color:var(--aqx-brand-hover);font-weight:800;">3 · </span><span class="mono">Service → Hook</span></h3><p style="font-size:22px;">the changed slice is read back up by the hook.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:25px;"><span style="color:var(--aqx-brand-hover);font-weight:800;">4 · </span><span class="mono">Hook → View</span></h3><p style="font-size:22px;">feeds the View — which <strong>re-renders</strong>, closing the loop.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3.4 apiViewController -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · apiViewController</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">apiViewController — the template for every API call</h2>
+  <p class="lead rise" style="margin-bottom:48px;">Every API call follows one shape: typed request and response schema in, <span class="mono">onSuccess</span> and <span class="mono">onError</span> out. Writes always go through the Service.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">orderViewController.ts</span></div>
+<pre style="font-size:22px;"><span class="kw">const</span> <span class="fn">createOrder</span> = (params: <span class="tag">ICreateOrder</span>) =&gt;
+  orderApi.<span class="fn">create</span>&lt;<span class="tag">ICreateOrder</span>, <span class="tag">IOrder</span>&gt;(params, {
+    <span class="attr">onSuccess</span>: (res) =&gt; orderService.<span class="fn">setLastOrder</span>(res),
+    <span class="attr">onError</span>:   (err) =&gt; snackbar.<span class="fn">show</span>(err.message),
+  });
+</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Typed both ways</h3><p>Request and response are typed to the Model schema — the contract is enforced at the call site.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>onSuccess + onError, always</h3><p>Both callbacks are non-negotiable in review. Success saves; error is handled, never a crash.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Writes go through the Service</h3><p><span class="mono">onSuccess</span> only ever calls a Service setter — the ViewController never mutates state directly.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3.5 Service — the source of truth -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · Service</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Service — the source of truth</h2>
+  <p class="lead rise" style="margin-bottom:48px;">A Service holds state, setters and context — and nothing else. No API calls, no business rules: it is pure, observable memory, one per domain.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">orderService.ts</span></div>
+<pre style="font-size:23px;"><span class="kw">class</span> <span class="tag">OrderService</span> <span class="kw">extends</span> <span class="tag">Service</span>&lt;{ lastOrder?: <span class="tag">IOrder</span> }&gt; {
+  <span class="fn">setLastOrder</span>(o: <span class="tag">IOrder</span>) {
+    <span class="kw">this</span>.context.lastOrder = o;   <span class="cmt">// setter only, no logic</span>
+  }
+}
+
+<span class="kw">export const</span> orderService = <span class="kw">new</span> <span class="tag">OrderService</span>();
+</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>State + setters + context</h3><p>The typed <span class="mono">context</span> is the observable state; setters are the only way to change it.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>No business logic</h3><p>No API calls, no rules. Anything that decides or transforms belongs in the ViewController.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Never called by UI</h3><p>The View reads through a Hook and writes through a ViewController — it never touches the Service.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3.5b ViewController — example layout -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · ViewController</span></div>
+  <h2 class="h2 rise" style="margin:30px 0 14px;">ViewController — the brain</h2>
+  <p class="lead rise" style="margin-bottom:26px;font-size:27px;">All business logic lives here. A class of methods the View calls — it applies rules, calls the API, and writes results into the Service. Real example: <span class="mono">OrderViewController</span>.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:52px;align-items:start;min-height:0;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">order/controller.ts</span></div>
+<pre style="font-size:21px;line-height:1.55;"><span class="kw">class</span> <span class="tag">OrderViewController</span> {
+  <span class="kw">private</span> selectedTab = <span class="tag">Tab</span>.OPEN;          <span class="cmt">// local logic state</span>
+
+  <span class="kw">public</span> fetchOrders = <span class="kw">async</span> () =&gt; {
+    orderService.<span class="fn">setLoading</span>(<span class="kw">true</span>);        <span class="cmt">// write to Service</span>
+    <span class="kw">await</span> orderAPIController.<span class="fn">getOrders</span>(params, {
+      <span class="fn">onSuccess</span>: (result) =&gt; {           <span class="cmt">// apply rules…</span>
+        orderService.<span class="fn">setOrders</span>(<span class="fn">sortByOpenTime</span>(result));
+      },
+      <span class="fn">onError</span>: () =&gt; snackbar.<span class="fn">error</span>(<span class="str">'Load failed'</span>),
+      <span class="fn">onFinally</span>: () =&gt; orderService.<span class="fn">setLoading</span>(<span class="kw">false</span>),
+    });
+  };
+
+  <span class="kw">public</span> selectOrder = (order) =&gt;
+    orderService.<span class="fn">setSelectedOrder</span>(order);
+}
+<span class="kw">export const</span> orderViewController = <span class="kw">new</span> <span class="tag">OrderViewController</span>();</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;">A class of methods</h3><p style="font-size:22px;">Public methods are what the View calls (<span class="mono">fetchOrders</span>, <span class="mono">selectOrder</span>). Exported as one instance.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;">Logic lives here</h3><p style="font-size:22px;">Sorting, filtering, which tab, deciding what to fetch — the rules the View and Service must not hold.</p></div></div>
+      <div class="bullet rise"><div class="dot"></div><div><h3 style="font-size:27px;">Calls API, writes Service</h3><p style="font-size:22px;">Uses the apiViewController with <span class="mono">onSuccess</span>/<span class="mono">onError</span>, then pushes results into the Service via setters.</p></div></div>
+      <div class="rule-chip rise"><span><strong>Rule:</strong> no JSX in here, and it never renders — it only decides and writes.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3.6 react-reservice in practice -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · react-reservice</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">react-reservice in practice</h2>
+  <p class="lead rise" style="margin-bottom:48px;">The library gives us one primitive; everything else — Model, Service, ViewController, Hook — is convention we layer on top. It is what makes our MVVM fit React.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">What it is</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">A <span class="mono">Service</span> class holding a plain-object <span class="mono">context</span>, plus <span class="mono">useService(service, selector)</span> — a hook that subscribes a component to a selected slice of that context.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Why it fits MVVM</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Global context and state without prop-drilling, and it enforces the layer split: Service is state, ViewController is logic, Hook is subscription — a component never mutates context except through a ViewController.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:44px;"><span><strong>Rule of thumb:</strong> subscribe to a <em>slice</em>. A component re-renders only when its selected slice changes — so a single price tick re-renders only the affected rows, not the whole tree.</span></div>
+</section>
+
+<!-- 3.7 Two state patterns / two kinds of state -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>aqx-core · repo shape</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Repo shape &amp; conventions</h2>
+  <p class="lead rise" style="margin-bottom:48px;">Everything is a package in our pnpm monorepo. A shared feature package splits platform-free <strong>core</strong> from thin <strong>web</strong> and <strong>mobile</strong> UI.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">@aqx-trader-watchlist/</span></div>
+<pre style="font-size:23px;">watchlist/
+├─ core/src/     <span class="cmt"># Model · Service</span>
+│                <span class="cmt"># ViewController · Hook</span>
+├─ web/src/      <span class="cmt"># web UI only</span>
+└─ mobile/src/   <span class="cmt"># mobile UI only</span>
+     └─ Card.test.tsx  <span class="cmt"># tests co-located</span>
+</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>core/ — the brain</h3><p>Model, Service, ViewController and Hooks. Platform-free logic, shared by both faces.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>web/ and mobile/ — thin faces</h3><p>UI only. Just the View, one folder per platform, importing the same core.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Tests beside the code</h3><p>Co-located <span class="mono">.test.tsx</span> files sit right next to what they cover.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:36px;"><span><strong>Mental model:</strong> the core / web / mobile split is our MVVM made physical — one brain, two faces.</span></div>
+</section>
+
+    <!-- ============ SECTION 04 DIVIDER ============ -->
+    <section class="slide divider">
+      <span class="kick">Section 04</span>
+      <span class="num">04</span>
+      <h2 style="margin:0 0 28px;">React vs React&nbsp;Native</h2>
+      <p class="lead" style="font-size:34px;">Same logic, different primitives. Components, props, hooks, state and MVVM are identical — only the render target changes.</p>
+    </section>
+
+    <!-- 4.1 same brain -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React Native · the mental model</span></div>
+      <h2 class="h2 rise" style="margin:34px 0 16px;">Same brain, new body</h2>
+      <p class="lead rise" style="margin-bottom:44px;">Write your logic once. The same <strong>brain</strong> drives two <strong>bodies</strong> — only the primitives it renders into change.</p>
+
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;min-height:0;">
+        <!-- BRAIN -->
+        <div class="rise" style="width:820px;max-width:100%;background:var(--aqx-surface-selected);border:2px solid var(--aqx-brand);border-radius:14px;padding:26px 40px;text-align:center;">
+          <div style="font-size:30px;font-weight:800;">🧠 The brain — shared <span class="mono" style="font-size:.8em;">core</span></div>
+          <div style="font-size:23px;margin-top:8px;" class="dim">components · props · hooks · <span class="mono">useState</span>/<span class="mono">useEffect</span> · MVVM · React Reservice · TypeScript</div>
+        </div>
+        <!-- split arrows -->
+        <div style="display:flex;justify-content:center;gap:420px;color:var(--aqx-brand);font-size:34px;font-weight:700;margin:2px 0;">↓&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+        <!-- BODIES -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;width:1100px;max-width:100%;">
+          <div class="rise" style="background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-top:6px solid var(--aqx-brand);border-radius:12px;padding:28px 36px;text-align:center;">
+            <div style="font-size:52px;">🖥️</div>
+            <div style="font-size:28px;font-weight:800;margin-top:6px;">Web body</div>
+            <div style="font-size:23px;margin-top:8px;" class="dim">renders <span class="mono">&lt;div&gt;</span> · <span class="mono">&lt;span&gt;</span> · click · react-router · Rspack</div>
+          </div>
+          <div class="rise" style="background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-top:6px solid var(--aqx-brand);border-radius:12px;padding:28px 36px;text-align:center;">
+            <div style="font-size:52px;">📱</div>
+            <div style="font-size:28px;font-weight:800;margin-top:6px;">Native body</div>
+            <div style="font-size:23px;margin-top:8px;" class="dim">renders <span class="mono">&lt;View&gt;</span> · <span class="mono">&lt;Text&gt;</span> · press · react-navigation · Metro</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-chip rise" style="max-width:1500px;margin-top:12px;"><span><strong>react-native-web</strong> closes the loop: write the component once — the platform picks the primitive (<span class="mono">&lt;div&gt;</span> or <span class="mono">&lt;View&gt;</span>, click or press).</span></div>
+    </section>
+
+    <!-- 4.2 overview map -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React Native · primitives</span></div>
+      <h2 class="h2 rise" style="margin:30px 0 14px;">Web → native — the primitives &amp; tools</h2>
+      <p class="lead rise" style="margin-bottom:24px;font-size:26px;">Same logic, other primitives. Every web tag and tool maps to a native one — only what you render into and package with changes.</p>
+      <div class="rise" style="flex:1;">
+        <table class="aqx" style="font-size:24px;">
+          <thead><tr><th style="width:18%;">Concern</th><th style="width:34%;">Web (React)</th><th class="w" style="width:48%;">Native (React Native)</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Container</td><td><span class="mono">&lt;div&gt;</span></td><td><span class="mono">&lt;View&gt;</span> — the universal box</td></tr>
+            <tr><td class="k">Text</td><td><span class="mono">&lt;span&gt; &lt;p&gt; &lt;h1&gt;</span></td><td><span class="mono">&lt;Text&gt;</span> — <strong>all text must live inside it</strong></td></tr>
+            <tr><td class="k">Gesture</td><td><span class="mono">&lt;button&gt; onClick</span></td><td><span class="mono">Pressable</span> / <span class="mono">TouchableOpacity</span> <span class="mono">onPress</span> — touches, not clicks</td></tr>
+            <tr><td class="k">Styling</td><td>styled-components + Tailwind</td><td>styled-components + <span class="mono">StyleSheet.create</span> · <span class="mono">flexDirection</span> defaults <span class="mono">column</span></td></tr>
+            <tr><td class="k">List</td><td><span class="mono">.map</span> · react-window</td><td><span class="mono">&lt;FlatList&gt;</span> (virtualized) · <strong style="color:var(--aqx-negative)">never nest ScrollViews</strong></td></tr>
+            <tr><td class="k">Navigation</td><td>react-router</td><td>react-navigation</td></tr>
+            <tr><td class="k">Events</td><td>mouse / keyboard listeners</td><td>foreground / background (<span class="mono">AppState</span>), custom listeners</td></tr>
+            <tr><td class="k">Bundler</td><td>Rspack · webpack · Vite</td><td>Metro</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4.3 Layout -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 1 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">Layout</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;">styled-components + Tailwind</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">We use <strong>both</strong> — all CSS under the hood. <span class="mono">flex-direction</span> defaults to <strong>row</strong>; units in <span class="mono">px</span>/<span class="mono">rem</span>. <span style="color:var(--aqx-brand-hover)">(details in the last section)</span></p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;">.row {
+  <span class="kw">display</span>: flex;
+  <span class="kw">flex-direction</span>: row;
+}</pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;">styled-components, same flex</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim"><span class="mono">flexDirection</span> defaults to <strong style="color:var(--aqx-negative)">column</strong> · unitless numbers · <strong style="color:var(--aqx-negative)">no nested ScrollViews</strong>.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="kw">const</span> s = StyleSheet.<span class="fn">create</span>({
+  row: { <span class="kw">flexDirection</span>: <span class="str">"row"</span> },
+});</pre></div>
+        </div>
+      </div>
+      <!-- scroll note -->
+      <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:28px;">
+        <div style="display:flex;align-items:center;gap:16px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-radius:8px;padding:18px 28px;">
+          <span style="font-size:24px;line-height:1.4;"><strong>Scroll:</strong> the page just scrolls — content past the edge overflows via <span class="mono">overflow: auto</span>.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:var(--aqx-surface-selected);border:1px solid var(--aqx-brand);border-radius:8px;padding:18px 28px;">
+          <span style="font-size:24px;line-height:1.4;"><strong>Scroll:</strong> nothing scrolls by default — you <strong>must</strong> wrap it in a <span class="mono">ScrollView</span> (or <span class="mono">FlatList</span> for long lists).</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.3b Flexbox visualized -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · flexbox</span></div>
+      <h2 class="h2 rise" style="margin:26px 0 8px;">Flexbox — direction &amp; the knobs</h2>
+      <p class="lead rise" style="margin-bottom:16px;font-size:24px;"><span class="mono">flexDirection</span> sets the main axis. <strong>Web defaults to <span style="color:var(--aqx-brand-hover)">row</span> · Native to <span style="color:var(--aqx-negative)">column</span></strong>. Then two knobs position the children: <strong style="color:var(--aqx-brand-hover)">justifyContent</strong> = along the <strong>main axis</strong> · <strong style="color:var(--aqx-positive)">alignItems</strong> = along the <strong>cross axis</strong>.</p>
+
+      <!-- ROW vs COLUMN -->
+      <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-bottom:18px;">
+        <div>
+          <div class="mono" style="font-size:20px;font-weight:700;margin-bottom:6px;color:var(--aqx-brand-hover);">flexDirection: row  <span class="dim" style="font-weight:400;">(web default) →</span></div>
+          <div style="display:flex;flex-direction:row;gap:10px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:8px;padding:12px;">
+            <div style="width:52px;height:52px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;">1</div>
+            <div style="width:52px;height:52px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;">2</div>
+            <div style="width:52px;height:52px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;">3</div>
+          </div>
+        </div>
+        <div>
+          <div class="mono" style="font-size:20px;font-weight:700;margin-bottom:6px;color:var(--aqx-negative);">flexDirection: column  <span class="dim" style="font-weight:400;">(RN default) ↓</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:8px;padding:12px;">
+            <div style="height:26px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;padding-left:12px;color:#fff;font-weight:800;font-size:18px;">1</div>
+            <div style="height:26px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;padding-left:12px;color:#fff;font-weight:800;font-size:18px;">2</div>
+            <div style="height:26px;background:var(--aqx-brand);border-radius:5px;display:flex;align-items:center;padding-left:12px;color:#fff;font-weight:800;font-size:18px;">3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE KNOBS -->
+      <div class="rise" style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 34px;align-content:start;min-height:0;">
+        <div>
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-brand-hover);">justifyContent: flex-start  <span class="dim" style="font-weight:400;">(main axis)</span></div>
+          <div style="display:flex;justify-content:flex-start;gap:8px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:9px;">
+            <div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+        <div>
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-brand-hover);">justifyContent: flex-end</div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:9px;">
+            <div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+        <div>
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-brand-hover);">justifyContent: center</div>
+          <div style="display:flex;justify-content:center;gap:8px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:9px;">
+            <div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+        <div>
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-brand-hover);">justifyContent: space-between</div>
+          <div style="display:flex;justify-content:space-between;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:9px;">
+            <div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div><div style="width:38px;height:38px;background:var(--aqx-brand);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+        <div>
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-datahub);">gap: 16  <span class="dim" style="font-weight:400;">(space between children)</span></div>
+          <div style="display:flex;gap:16px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:9px;">
+            <div style="width:38px;height:38px;background:var(--aqx-datahub);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div><div style="width:38px;height:38px;background:var(--aqx-datahub);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div><div style="width:38px;height:38px;background:var(--aqx-datahub);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+        <div style="grid-column:1 / -1;">
+          <div class="mono" style="font-size:19px;font-weight:700;margin-bottom:5px;color:var(--aqx-positive);">alignItems: center  <span class="dim" style="font-weight:400;">(cross axis — differing heights line up on center)</span></div>
+          <div style="display:flex;align-items:center;gap:12px;height:74px;background:var(--aqx-surface-alt);border:1px dashed var(--aqx-border-strong);border-radius:6px;padding:0 12px;">
+            <div style="width:42px;height:30px;background:var(--aqx-positive);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">1</div>
+            <div style="width:42px;height:58px;background:var(--aqx-positive);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">2</div>
+            <div style="width:42px;height:44px;background:var(--aqx-positive);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">3</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.4 List -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 2 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">List</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;"><span class="mono">.map</span> · react-window</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Small lists: <span class="mono">.map</span> straight to elements. Long lists: <span class="mono">react-window</span> virtualizes rows so the DOM stays small.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;">{rows.<span class="fn">map</span>(r =&gt; (
+  <span class="tag">&lt;Row</span> key={r.id} {...r} <span class="tag">/&gt;</span>
+))}</pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;"><span class="mono">FlatList</span> (virtualized)</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Virtualization is built in — renders only on-screen rows and recycles them. The default for any list of real length.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="tag">&lt;FlatList</span>
+  data={rows}
+  renderItem={({item}) =&gt; <span class="tag">&lt;Row</span> {...item}<span class="tag">/&gt;</span>}
+<span class="tag">/&gt;</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.5 Navigation -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 3 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">Navigation</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;">react-router</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">The <strong>URL</strong> is the source of truth. Routes map paths to components; back/forward are the browser's.</p>
+          <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--aqx-border);border-left:5px solid var(--aqx-ink);border-radius:8px;padding:16px 22px;">
+            <span style="font-size:28px;">🔄</span>
+            <span style="font-size:23px;line-height:1.4;"><strong>Always replaces</strong> — one screen swaps for the next; the URL changes.</span>
+          </div>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="fn">navigate</span>(<span class="str">"/orders/58201"</span>);</pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;">react-navigation</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">No URL bar. You <strong>push / pop</strong> a screen stack and pass params as objects; the library owns the back gesture.</p>
+          <div style="display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--aqx-brand);border-left:5px solid var(--aqx-brand);border-radius:8px;padding:16px 22px;">
+            <span style="font-size:28px;">🗂️</span>
+            <span style="font-size:23px;line-height:1.4;"><strong>Stacks on top</strong> — <span class="mono">push</span> adds a screen, <span class="mono">pop</span> removes it; the old one stays underneath.</span>
+          </div>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;">navigation.<span class="fn">push</span>(<span class="str">"OrderDetail"</span>,
+  { orderId: <span class="str">"58201"</span> });</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.6 Gesture -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 4 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">Gesture</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;">mouse click on <span class="mono">&lt;div&gt;</span></h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Anything can take <span class="mono">onClick</span>. Hover states exist; a cursor is precise.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="tag">&lt;div</span> onClick={buy}<span class="tag">&gt;</span>Buy<span class="tag">&lt;/div&gt;</span></pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;">touch via <span class="mono">Pressable</span></h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Touch, not click. No hover — use a <strong>pressed</strong> state, and give targets real size (≥ 44pt).</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="tag">&lt;Pressable</span> onPress={buy}<span class="tag">&gt;</span>
+  <span class="tag">&lt;Text&gt;</span>Buy<span class="tag">&lt;/Text&gt;</span>
+<span class="tag">&lt;/Pressable&gt;</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.7 Text -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 5 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">Text</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:20px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;"><span class="mono">&lt;span&gt;</span> <span class="mono">&lt;p&gt;</span> <span class="mono">&lt;h1&gt;</span> — even <span class="mono">&lt;div&gt;</span></h3>
+          <p style="font-size:25px;line-height:1.5;" class="dim">Text can sit as a raw child of almost any element — a heading, a paragraph, even a plain <span class="mono">&lt;div&gt;</span>. The browser lays it out for you.</p>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:baseline;gap:14px;"><span class="mono" style="font-size:22px;color:var(--aqx-brand-hover);font-weight:700;min-width:78px;">&lt;div&gt;</span><span style="font-size:23px;">block — takes the <strong>full width</strong>, stacks vertically.</span></div>
+            <div style="display:flex;align-items:baseline;gap:14px;"><span class="mono" style="font-size:22px;color:var(--aqx-brand-hover);font-weight:700;min-width:78px;">&lt;span&gt;</span><span style="font-size:23px;">inline — flows <strong>within a line</strong>, only as wide as its text.</span></div>
+          </div>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:22px;"><span class="tag">&lt;h1&gt;</span>EUR/USD<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;p&gt;</span>Spread <span class="tag">&lt;span&gt;</span>0.2<span class="tag">&lt;/span&gt;</span><span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;div&gt;</span><span class="tag">&lt;span&gt;</span>EURUSD<span class="tag">&lt;/span&gt;</span><span class="tag">&lt;/div&gt;</span></pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;"><span class="mono">&lt;Text&gt;</span> — required</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Every string <strong>must</strong> be wrapped in <span class="mono">&lt;Text&gt;</span>. A bare string inside a <span class="mono">&lt;View&gt;</span> is a runtime error.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:23px;"><span class="tag">&lt;View&gt;</span>
+  <span class="tag">&lt;Text&gt;</span>EURUSD<span class="tag">&lt;/Text&gt;</span>
+<span class="tag">&lt;/View&gt;</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.8 EventListener -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 6 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">EventListener</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;">mouse &amp; keyboard</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Listen on the DOM: click, keydown, resize, <span class="mono">visibilitychange</span>. The window and document are your event bus.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:22px;">window.<span class="fn">addEventListener</span>(
+  <span class="str">"keydown"</span>, onKey);</pre></div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;">app lifecycle &amp; custom</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">No DOM. Listen to <strong>foreground / background</strong> (<span class="mono">AppState</span>), keyboard show/hide, and your own emitters.</p>
+          <div class="code" style="margin-top:auto;"><pre style="font-size:22px;">AppState.<span class="fn">addEventListener</span>(
+  <span class="str">"change"</span>, onAppState);</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4.9 Bundler -->
+    <section class="slide">
+      <div class="eyebrow rise"><div class="bar"></div><span>React vs React Native · 7 / 7</span></div>
+      <h2 class="h2 rise" style="margin:36px 0 44px;">Bundler</h2>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:stretch;">
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;">
+          <span class="badge stack" style="align-self:flex-start;">Web (React)</span>
+          <h3 style="font-size:34px;font-weight:700;">Rspack</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">Transforms TS/JSX → JS, bundles modules, runs the dev server with hot reload. Module Federation splits micro-frontends.</p>
+          <div style="margin-top:auto;font-size:24px;font-weight:600;color:var(--aqx-text-primary);">→ browser bundle</div>
+        </div>
+        <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border-color:var(--aqx-brand);background:var(--aqx-surface-selected);">
+          <span class="badge stack" style="align-self:flex-start;">Native (RN)</span>
+          <h3 style="font-size:34px;font-weight:700;">Metro</h3>
+          <p style="font-size:26px;line-height:1.5;" class="dim">The RN-specific bundler. Same job — transform + bundle + serve — tuned for native, producing the JS bundle the app shell loads.</p>
+          <div style="margin-top:auto;font-size:24px;font-weight:600;color:var(--aqx-text-primary);">→ native JS bundle</div>
+        </div>
+      </div>
+    </section>
+
+<!-- 4.a Why React Native -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React Native · why</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Why React Native?</h2>
+  <p class="lead rise" style="margin-bottom:48px;">Native the hard way is two codebases. React Native is one — driving real native views, not a webview.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Native, the hard way</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Android in <strong>Kotlin / Java</strong>, iOS in <strong>Swift / Obj-C</strong> — two codebases, two skill sets, two teams to keep in sync.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">React Native</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Write <strong>JS / TS once</strong>. It drives <strong>real native views</strong> on both platforms — not a webview — so you get native-like performance from one shared codebase.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:40px;"><span><strong>Mental model:</strong> React is the brain; the render target is swappable. Components, props, hooks, state, our MVVM — all identical. What changes: no DOM, no HTML, no CSS files.</span></div>
+</section>
+
+<!-- 4.b Platform primitives -->
+
+<!-- 4.c Two layers, two kinds of dependency -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React Native · dependencies</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Two layers, two kinds of dependency</h2>
+  <p class="lead rise" style="margin-bottom:44px;">An RN app is two things stacked — a native shell with your JS bundle running inside it. Dependencies split the same way.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">JS-level deps</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Pure JavaScript — <span class="mono">lodash</span>, <span class="mono">dayjs</span>.</p>
+      <p style="font-size:26px;line-height:1.45;color:var(--aqx-text-primary);"><span class="mono">pnpm install</span> → <strong>reload</strong>. Done.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Native deps</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Ship real Swift / Kotlin — <span class="mono">mmkv</span>, <span class="mono">reanimated</span>, camera.</p>
+      <p style="font-size:26px;line-height:1.45;color:var(--aqx-text-primary);"><span class="mono">pnpm install</span> → <span class="mono">pod install</span> → <strong>rebuild the shell</strong> &amp; run.</p>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:40px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> the tell — if reloading the JS doesn't pick up a new package, it's a native dep. The JS bundle is the face you can hot-swap; the native shell is the body you have to recompile.</span>
+  </div>
+</section>
+
+<!-- 4.d React Native Web & the two builds -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>React Native · web</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">React Native Web &amp; the two builds</h2>
+  <p class="lead rise" style="margin-bottom:48px;">One component tree, three platforms — the bundler swaps <span class="mono">react-native</span> for <span class="mono">react-native-web</span> in the web build.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:22px;">
+      <div class="card rise" style="padding:32px 40px;display:flex;flex-direction:column;gap:12px;">
+        <h3 style="font-size:32px;font-weight:600;">One codebase, three targets</h3>
+        <p style="font-size:26px;line-height:1.45;" class="dim"><strong>iOS</strong> &amp; <strong>Android</strong> via React Native · <strong>Web</strong> via react-native-web, which re-implements <span class="mono">View</span>/<span class="mono">Text</span> on HTML + CSS.</p>
+      </div>
+      <div class="rule-chip rise" style="max-width:100%;"><span><strong>Mental model:</strong> React is the brain; the render target is swappable. <span class="mono">react-dom</span> draws a browser, RN draws native views, react-native-web lets RN code draw a browser too.</span></div>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">the .web / .native file split</span></div>
+<pre><span class="cmt">// bundler picks the right file per target</span>
+Chart<span class="kw">.web</span>.tsx     <span class="cmt">// browser build</span>
+Chart<span class="kw">.native</span>.tsx  <span class="cmt">// iOS + Android</span>
+Chart<span class="kw">.ios</span>.tsx     <span class="cmt">// iOS only, if it differs</span>
+
+<span class="cmt">// or branch inline:</span>
+<span class="kw">import</span> { Platform } <span class="kw">from</span> <span class="str">'react-native'</span>;
+<span class="kw">if</span> (Platform.OS === <span class="str">'web'</span>) { <span class="cmt">/* … */</span> }</pre>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:36px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha — two builds:</strong> a running RN app = a native shell (Xcode/Gradle, slow) + a JS bundle (Metro, instant). Saving TSX only needs Metro; a new native dependency needs a shell rebuild. Know which one broke.</span>
+  </div>
+</section>
+
+<!-- Section 05 divider -->
+<section class="slide divider">
+  <span class="kick">Section 05</span>
+  <span class="num">05</span>
+  <h2 style="margin:0 0 28px;">Mobile UI conventions</h2>
+  <p class="lead" style="font-size:34px;">The patterns and gotchas the web never made you think about — safe areas, keyboards, gestures, and how you actually boot and ship a device app.</p>
+</section>
+
+<!-- 5.a Mobile realities & running it -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Mobile UI · realities</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Mobile realities — the house rules</h2>
+  <p class="lead rise" style="margin-bottom:44px;">Things the web never made you think about. Six device truths you design around every screen.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Safe areas</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Notches &amp; home indicator clip edge-to-edge UI → wrap in <span class="mono">SafeAreaView</span>.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Keyboard</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">The on-screen keyboard covers inputs — you manage avoidance yourself.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Gestures</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Swipe, long-press, pan replace hover — <strong>there is no hover</strong> on touch.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Touch targets</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Fingers aren't cursors — hit areas need real size (~44px), not pixel-perfect.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Foreground / background</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">Apps get suspended &amp; resumed — react to <span class="mono">AppState</span>, refresh on return.</p>
+    </div>
+    <div class="card rise" style="padding:34px 38px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:32px;font-weight:600;">Per-platform feel</h3>
+      <p style="font-size:25px;line-height:1.4;" class="dim">iOS ≠ Android — motion, back behaviour, and defaults differ by design.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5.b SafeAreaView -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Mobile UI · safe areas</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">SafeAreaView — stay out of the hardware</h2>
+  <p class="lead rise" style="margin-bottom:36px;">A phone screen isn't a clean rectangle. Draw edge-to-edge and the notch, status bar, or home indicator clips your UI.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Wrap each screen</h3><p>Use <span class="mono">SafeAreaView</span> from <span class="mono">react-native-safe-area-context</span> so padding adapts per device and orientation.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Read real insets</h3><p><span class="mono">useSafeAreaInsets()</span> gives you the actual top/bottom values when you need finer control.</p>
+      </div></div>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">OrderScreen.tsx</span></div>
+<pre style="font-size:20px;"><span class="kw">import</span> { <span class="tag">SafeAreaView</span> }
+  <span class="kw">from</span> <span class="str">'react-native-safe-area-context'</span>;
+
+<span class="kw">function</span> <span class="fn">OrderScreen</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;SafeAreaView</span> <span class="attr">style</span>={{ flex: 1 }}<span class="tag">&gt;</span>
+      <span class="cmt">{/* your UI — never clipped */}</span>
+      <span class="tag">&lt;OrderTicket /&gt;</span>
+    <span class="tag">&lt;/SafeAreaView&gt;</span>
+  );
+}</pre>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:22px 34px;max-width:100%;margin-top:28px;">
+    <span style="font-size:24px;line-height:1.45;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> never hard-code <span class="mono">paddingTop: 44</span> — the inset differs per device and per orientation. Let SafeAreaView read the real insets for you.</span>
+  </div>
+</section>
+
+<!-- 5.c Start the app -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Mobile UI · running it</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Start the app — Metro, simulators, pods</h2>
+  <p class="lead rise" style="margin-bottom:44px;">Four commands take you from a cold laptop to a running app.</p>
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="rise" style="display:flex;align-items:center;gap:28px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:22px 34px;">
+      <span style="font-size:40px;font-weight:800;color:var(--aqx-brand);min-width:52px;">1</span>
+      <div style="min-width:290px;"><h3 style="font-size:32px;font-weight:700;"><span class="mono">pnpm start</span></h3></div>
+      <p style="font-size:26px;line-height:1.45;margin:0;" class="dim">Boot <strong>Metro</strong>, RN's bundler + dev server (the Rspack counterpart). Leave it running in its own terminal.</p>
+    </div>
+    <div class="rise" style="display:flex;align-items:center;gap:28px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:22px 34px;">
+      <span style="font-size:40px;font-weight:800;color:var(--aqx-brand);min-width:52px;">2</span>
+      <div style="min-width:290px;"><h3 style="font-size:32px;font-weight:700;"><span class="mono">cd ios &amp;&amp; pod install</span></h3></div>
+      <p style="font-size:26px;line-height:1.45;margin:0;" class="dim">Link iOS native deps via <strong>CocoaPods</strong>. Rerun after adding or updating a native module.</p>
+    </div>
+    <div class="rise" style="display:flex;align-items:center;gap:28px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:22px 34px;">
+      <span style="font-size:40px;font-weight:800;color:var(--aqx-brand);min-width:52px;">3</span>
+      <div style="min-width:290px;"><h3 style="font-size:32px;font-weight:700;"><span class="mono">pnpm ios</span></h3></div>
+      <p style="font-size:26px;line-height:1.45;margin:0;" class="dim">Build the native shell, boot the <strong>Simulator</strong>, install the app, connect it to Metro.</p>
+    </div>
+    <div class="rise" style="display:flex;align-items:center;gap:28px;background:var(--aqx-surface-alt);border:1px solid var(--aqx-border);border-left:6px solid var(--aqx-brand);border-radius:8px;padding:22px 34px;">
+      <span style="font-size:40px;font-weight:800;color:var(--aqx-brand);min-width:52px;">4</span>
+      <div style="min-width:290px;"><h3 style="font-size:32px;font-weight:700;"><span class="mono">pnpm android</span></h3></div>
+      <p style="font-size:26px;line-height:1.45;margin:0;" class="dim">Same, into the Android <strong>emulator</strong>. Open the dev menu with <span class="mono">Cmd+D</span> (iOS) / <span class="mono">Cmd+M</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5.d Expo, EAS Update, and why we're bare -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Mobile UI · release model</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Expo, EAS Update, and why we're "bare"</h2>
+  <p class="lead rise" style="margin-bottom:44px;">Two ways to ship a change — one takes minutes, one takes days.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">JS-only change → OTA</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Bug fix, copy, layout tweak. <span class="mono">eas update</span> ships over-the-air — users get it on next launch, <strong>no store review</strong>.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Native change → store</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">New native dep, permission, SDK bump. <span class="mono">gradlew</span> / <span class="mono">xcodebuild</span> + review — <strong>days</strong>, and a version bump.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:40px;"><span><strong>Mental model:</strong> we're <strong>bare RN</strong> — we own the <span class="mono">ios/</span> and <span class="mono">android/</span> folders ourselves, while using Expo's native modules (<span class="mono">expo-updates</span>, splash-screen, vector-icons). Full native control, Expo's batteries.</span></div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:28px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> OTA ships JS only. Anything that touches native code still needs a full store release. JS fix → <span class="mono">eas update</span>; native change → apk/aab/ipa.</span>
+  </div>
+</section>
+
+<!-- 5.e Artifacts & distribution -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Mobile UI · distribution</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Artifacts &amp; distribution — what you actually ship</h2>
+  <p class="lead rise" style="margin-bottom:36px;">Three build outputs, three jobs — plus the OTA bundle that rides alongside them.</p>
+  <table class="aqx rise" style="font-size:25px;">
+    <thead><tr><th>Artifact</th><th>What it is</th><th class="w">Where it goes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Android · <span class="mono">.apk</span></td><td><strong>Directly-installable</strong> app file. <span class="mono">./gradlew assembleRelease</span>.</td><td>Sideload onto a device for internal test builds</td></tr>
+      <tr><td class="k">Android · <span class="mono">.aab</span></td><td>What the <strong>Play Store</strong> wants — Google repackages per-device. <span class="mono">./gradlew bundleRelease</span>.</td><td>Play Console → testing tracks → production</td></tr>
+      <tr><td class="k">iOS · <span class="mono">.ipa</span></td><td><strong>Built &amp; signed by Xcode</strong>, uploaded to Apple.</td><td>App Store Connect → TestFlight → App Store review</td></tr>
+      <tr><td class="k">OTA · JS bundle</td><td>Just the JavaScript. <span class="mono">eas update</span>.</td><td>Straight to users on next launch — no binary, no review</td></tr>
+    </tbody>
+  </table>
+  <div class="rule-chip rise" style="max-width:1400px;margin-top:36px;"><span><strong>Mental model:</strong> same JS brain, two shipping bodies on a two-cadence release. Testers see it first (TestFlight / testing tracks), then production — while OTA JS fixes slip out in between.</span></div>
+</section>
+
+<!-- Section 06 divider -->
+<section class="slide divider">
+  <span class="kick">Section 06</span>
+  <span class="num">06</span>
+  <h2 style="margin:0 0 28px;">Stack &amp; libraries</h2>
+  <p class="lead" style="font-size:34px;">The real inventory — every tool we run, and the one job each of them does.</p>
+</section>
+
+<!-- 6.1 Our actual stack -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · overview</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Our actual stack</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Three jobs, top to bottom: what we <strong>write</strong>, how it's <strong>organized</strong>, how it's <strong>turned into a running app</strong> — then shipped.</p>
+  <table class="aqx">
+    <thead><tr><th>Layer</th><th>Tool</th><th class="w">Its one job</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Language</td><td><span class="mono">TypeScript 5.8</span></td><td>Everything we write — every package is typed</td></tr>
+      <tr><td class="k">Framework</td><td><span class="mono">React 19.1 · RN 0.81 · RN Web · Expo 54</span></td><td>UI shared across web &amp; mobile</td></tr>
+      <tr><td class="k">Bundler</td><td><span class="mono">Rspack · Metro</span></td><td>Compile &amp; package source for the target</td></tr>
+      <tr><td class="k">Package mgr</td><td><span class="mono">pnpm workspaces</span></td><td>The monorepo — many packages, shared deps</td></tr>
+      <tr><td class="k">Runtime</td><td><span class="mono">Node ≥22 · NVM</span></td><td>Runs the tools (not the app)</td></tr>
+      <tr><td class="k">CI / CD</td><td><span class="mono">Husky · lint-staged</span></td><td>Checks on every commit before merge</td></tr>
+      <tr><td class="k">Delivery</td><td><span class="mono">CDN</span></td><td>Static bundle served to users</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 6.2 Node.js & NVM -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · Node &amp; NVM</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Node.js &amp; NVM</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>Node — JS outside the browser</h3><p>Runs JS on your machine. It doesn't run our <em>app</em> — it runs our <strong>tools</strong>: dev server, TS compiler, linter, test runner. Step zero of any FE setup.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>NVM — the right version per repo</h3><p>Installs several Node versions and switches between them. Each repo pins its version in <span class="mono">.nvmrc</span>.</p>
+      </div></div>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">terminal</span></div>
+<pre><span class="fn">nvm</span> install 20   <span class="cmt"># install a Node version</span>
+<span class="fn">nvm</span> use          <span class="cmt"># switch to the version this repo pins</span>
+<span class="fn">node</span> -v         <span class="cmt"># confirm which version is active</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 6.3 What is an npm package -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · packages</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">What is an npm package?</h2>
+  <p class="lead rise" style="margin-bottom:44px;">A <strong>package</strong> is reusable code — a third-party library someone already wrote, tested and published — so <strong>we don't reinvent the wheel</strong>. Add one command, import it, build on top.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">What we get from packages</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim"><strong>React, React Query, Zod</strong> — almost our whole stack is packages. Validation, HTTP, charts, dates: pull in a proven one instead of writing it. They live on the registry (<span class="mono">npmjs.com</span>) and land in <span class="mono">node_modules</span>.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">When to write it yourself</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Reach for a package on <strong>solved, generic</strong> problems. Write your own when it's <strong>core to our product</strong> or trivially small.</p>
+    </div>
+  </div>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:36px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha:</strong> every package is code you <strong>trust and ship to users</strong> — it adds weight and a maintenance/security surface. Prefer well-maintained, widely-used ones.</span>
+  </div>
+</section>
+
+<!-- 6.4 Packages, manifest, lockfile -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · manifest &amp; lockfile</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Packages, manifest, lockfile</h2>
+  <p class="lead rise" style="margin-bottom:44px;">Three files orchestrate every dependency.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;"><span class="mono">package.json</span></h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">The <strong>manifest</strong> — dependencies (version ranges) + named <strong>scripts</strong> (<span class="mono">dev build test</span>). ✅ committed.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;"><span class="mono">pnpm-lock.yaml</span></h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">The <strong>exact resolved version</strong> of every package, so everyone installs identical code. ✅ committed · never hand-edited.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;"><span class="mono">node_modules/</span></h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Where packages physically land. Huge. ❌ never committed.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Add a dep:</strong> <span class="mono">pnpm add axios</span> → pinned in the lockfile → lands in <span class="mono">node_modules</span> → <span class="mono">import</span> in your file.</span></div>
+</section>
+
+<!-- 6.5 Monorepo & pnpm workspaces -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · monorepo</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Monorepo &amp; pnpm workspaces</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">pnpm-workspace.yaml + the real tree</span></div>
+<pre><span class="cmt"># pnpm-workspace.yaml</span>
+<span class="kw">packages</span>:
+  - <span class="str">'packages/@aqx-core/*'</span>     <span class="cmt"># shared brain</span>
+  - <span class="str">'packages/@aqx-member/*'</span>   <span class="cmt"># web + mobile</span>
+
+<span class="cmt"># the real tree</span>
+packages/
+  @aqx-core/common     <span class="cmt"># Model + Service</span>
+  @aqx-member/web      <span class="cmt"># the browser app</span>
+  @aqx-member/mobile   <span class="cmt"># the RN app</span>
+
+<span class="cmt">// web/package.json</span>
+<span class="str">"@aqx-core/common"</span>: <span class="str">"workspace:^"</span>  <span class="cmt">// symlink</span></pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3>One repo, many packages</h3><p>Versioned together — they share code <em>without publishing</em> to a registry.</p>
+      </div></div>
+      <div class="bullet rise"><div class="dot"></div><div>
+        <h3><span class="mono">workspace:^</span> = symlink next door</h3><p>Not a downloaded copy. Edit <span class="mono">@aqx-core/common</span> once and both <span class="mono">web</span> and <span class="mono">mobile</span> see it immediately.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6.6 NPM vs PNPM -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · npm vs pnpm</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">NPM vs PNPM — and why PNPM</h2>
+  <table class="aqx">
+    <thead><tr><th></th><th>npm (the default)</th><th class="w">pnpm (what we use)</th></tr></thead>
+    <tbody>
+      <tr><td class="k">On disk</td><td>Copies node_modules into every app — duplicated across a monorepo</td><td>One global content-addressed store, symlinked into each project — no duplication, fast installs</td></tr>
+      <tr><td class="k">Strictness</td><td>Lets you import undeclared "phantom" deps</td><td>Stricter resolution catches phantom deps early</td></tr>
+      <tr><td class="k">Everyday</td><td><span class="mono">npm install</span></td><td><span class="mono">pnpm add axios · pnpm dev · pnpm --filter web dev</span></td></tr>
+    </tbody>
+  </table>
+  <div class="rise" style="display:flex;align-items:center;gap:20px;background:var(--aqx-negative-soft);border:1px solid var(--aqx-negative);border-radius:8px;padding:26px 36px;max-width:1400px;margin-top:36px;">
+    <span style="font-size:26px;line-height:1.5;color:var(--aqx-text-primary);"><strong style="color:var(--aqx-negative)">Gotcha — first aid:</strong> most "works on my machine" issues = wrong Node version or stale <span class="mono">node_modules</span>. In order: <span class="mono">nvm use</span> → delete <span class="mono">node_modules</span> → <span class="mono">pnpm install</span>.</span>
+  </div>
+</section>
+
+<!-- 6.7 Bundlers -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · bundlers</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Bundlers — transform, bundle, serve</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Our source — TS, JSX, hundreds of files — isn't something a browser can run. A bundler does three jobs.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Transform</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Compile TypeScript and JSX into plain JavaScript; process styles and images.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Bundle</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Follow every <span class="mono">import</span> from the entry file, merge the graph, tree-shake unused code.</p>
+    </div>
+    <div class="card rise" style="padding:40px 44px;display:flex;flex-direction:column;gap:18px;">
+      <h3 style="font-size:34px;font-weight:600;">Serve (dev)</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">A dev server with HMR: save a file and the changed module swaps into the running page in ~100ms, keeping state.</p>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Two commands:</strong> <span class="mono">pnpm dev</span> → dev server + instant HMR · <span class="mono">pnpm build</span> → <span class="mono">dist/</span> of optimized static files → deploy to CDN.</span></div>
+</section>
+
+<!-- 6.8 Our bundlers — Rspack & Metro -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · Rspack &amp; Metro</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Our bundlers — Rspack &amp; Metro</h2>
+  <p class="lead rise" style="margin-bottom:40px;">Same job — turn code we like writing into code the target can run — with the engine chosen per platform.</p>
+  <table class="aqx">
+    <thead><tr><th>Bundler</th><th>What it is</th><th class="w">Where we use it</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Rspack</td><td>Rust-based, webpack-compatible bundler — <strong>replaces webpack</strong>, fast, with the config power we need. <strong>Module Federation</strong> gives us micro-frontends.</td><td>Web app <strong>and</strong> mobile-web builds</td></tr>
+      <tr><td class="k">Metro</td><td>React Native's own bundler &amp; dev server</td><td>The native mobile app (Part 4)</td></tr>
+    </tbody>
+  </table>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> Rspack for web, Metro for React Native.</span></div>
+</section>
+
+<!-- 6.9 Styling in our stack -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · styling</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Styling in our stack</h2>
+  <p class="lead rise" style="margin-bottom:36px;">Two authoring styles — both emit the <strong>same CSS properties</strong>.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">styled-components</span></div>
+<pre style="font-size:22px;"><span class="kw">const</span> <span class="fn">BuyButton</span> = styled.button`
+  padding: 8px 16px;
+  background: ${(p) =&gt;
+    p.$active ? <span class="str">'#0CA3B8'</span> : <span class="str">'#1E2C3B'</span>};
+  color: white;
+  &amp;:hover { opacity: 0.9; }
+`;</pre>
+    </div>
+    <div class="code rise">
+      <div class="bar"><div class="dot3"><i style="background:#F28B9B"></i><i style="background:#FFCB00"></i><i style="background:#7CD9A8"></i></div><span class="fn">Tailwind</span></div>
+<pre style="font-size:22px;"><span class="tag">&lt;button</span>
+  <span class="attr">className</span>={
+    <span class="str">'px-4 py-2 text-white '</span> +
+    (active ? <span class="str">'bg-cyan-600'</span>
+            : <span class="str">'bg-slate-700'</span>)
+  }
+<span class="tag">&gt;</span>{children}<span class="tag">&lt;/button&gt;</span></pre>
+    </div>
+  </div>
+  <div class="rule-chip rise" style="max-width:1400px;"><span><strong>Mental model:</strong> styled-components = "CSS as components"; Tailwind = "CSS as a vocabulary of ready-made words." Same CSS, different delivery.</span></div>
+</section>
+
+<!-- 6.10 Library reference grid -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Stack · library reference</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">The libraries, one line each</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">React Query</h3><p style="font-size:24px;line-height:1.4;" class="dim">Server-state cache — fetch, dedupe, invalidate, refetch.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">react-reservice</h3><p style="font-size:24px;line-height:1.4;" class="dim">Our MVVM Service layer — holds context (client state).</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">Zod</h3><p style="font-size:24px;line-height:1.4;" class="dim">Runtime schema — validate API responses, infer TS types.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">styled-components</h3><p style="font-size:24px;line-height:1.4;" class="dim">CSS inside the component; unique classes, props-driven.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">react-navigation</h3><p style="font-size:24px;line-height:1.4;" class="dim">Native routing — stacks &amp; tabs on iOS/Android.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">react-router</h3><p style="font-size:24px;line-height:1.4;" class="dim">Web routing — URL ↔ which component renders.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">Metro</h3><p style="font-size:24px;line-height:1.4;" class="dim">React Native's bundler + dev server.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">FlatList</h3><p style="font-size:24px;line-height:1.4;" class="dim">Virtualized RN list — renders only visible rows.</p>
+    </div>
+    <div class="card rise" style="padding:30px 34px;display:flex;flex-direction:column;gap:12px;">
+      <h3 style="font-size:30px;font-weight:600;">pnpm</h3><p style="font-size:24px;line-height:1.4;" class="dim">Package manager — one shared store, symlinked workspaces.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Section 07 divider -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Reference · appendix</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Deeper, when you're ready</h2>
+  <p class="lead rise" style="margin-bottom:36px;">None of this blocks you from shipping — it's the floor beneath the floor. Pull one thread when you're curious.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div class="card rise" style="padding:36px 42px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">A1 · How a React app boots</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim"><span class="mono">main.tsx</span> → <span class="mono">createRoot(el)</span> → <span class="mono">.render(&lt;App/&gt;)</span> → the first paint. One entry point kicks the whole tree off.</p>
+    </div>
+    <div class="card rise" style="padding:36px 42px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">A2 · Reconciliation, one layer down</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">A re-render builds a <strong>fiber</strong> tree and diffs it (<strong>render phase</strong>, pure &amp; interruptible), then writes the DOM in one go (<strong>commit phase</strong>). <span class="mono">key</span> steers the diff.</p>
+    </div>
+    <div class="card rise" style="padding:36px 42px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">A3 · Effect timing ladder</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim"><span class="mono">ref</span> callback fires first, then <span class="mono">useLayoutEffect</span> (before paint — measure/sync), then <span class="mono">useEffect</span> (after paint — the default).</p>
+    </div>
+    <div class="card rise" style="padding:36px 42px;display:flex;flex-direction:column;gap:14px;">
+      <h3 style="font-size:34px;font-weight:600;">A4 · Reading TypeScript</h3>
+      <p style="font-size:26px;line-height:1.45;" class="dim">Generics (<span class="mono">Foo&lt;T&gt;</span>), unions (<span class="mono">'buy' | 'sell'</span>), and the utility types you'll meet daily: <span class="mono">Partial&lt;T&gt;</span>, <span class="mono">Pick&lt;T,K&gt;</span>, <span class="mono">Record&lt;K,V&gt;</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8.2 Glossary -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — core React &amp; web</h2>
+  <table class="aqx" style="font-size:25px;">
+    <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="k">DOM</td><td>The browser's live tree of page elements</td><td class="k">Store</td><td>App-wide state container (Zustand)</td></tr>
+      <tr><td class="k">SPA</td><td>One JS program drives the whole UI; no reloads</td><td class="k">Slice</td><td>Subscribing to part of a store to limit re-renders</td></tr>
+      <tr><td class="k">Component</td><td>A function that returns UI</td><td class="k">Server state</td><td>Backend-owned data the frontend caches</td></tr>
+      <tr><td class="k">JSX / TSX</td><td>HTML-like syntax inside JS/TS</td><td class="k">Invalidation</td><td>Marking a query stale so it refetches</td></tr>
+      <tr><td class="k">Props</td><td>Read-only inputs passed parent → child</td><td class="k">HMR</td><td>Dev server hot-swapping changed code on save</td></tr>
+      <tr><td class="k">State</td><td>Data a component owns; changing it re-renders</td><td class="k">Bundler</td><td>Compiles + packages source (Rspack, Metro)</td></tr>
+      <tr><td class="k">Hook</td><td>A <span class="mono">useXxx</span> into state or lifecycle</td><td class="k">Model</td><td>MVVM: the API schema / data shapes</td></tr>
+      <tr><td class="k">Virtual DOM</td><td>React's in-memory UI, diffed for minimal updates</td><td class="k">Service</td><td>MVVM: stores context — the state</td></tr>
+      <tr><td class="k">Reconciliation</td><td>Diffing new vs old virtual DOM to patch changes</td><td class="k">ViewController</td><td>MVVM: business logic; UI writes here</td></tr>
+      <tr><td class="k">Prop drilling</td><td>Relaying props through layers that don't use them</td><td class="k">Hook (VM)</td><td>MVVM: lets UI read context</td></tr>
+      <tr><td class="k">Context</td><td>Share a value with a whole subtree</td><td class="k">Schema</td><td>A Zod shape validated at runtime</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8.3 Glossary — React Native & tooling -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary (RN &amp; tooling)</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — React Native &amp; tooling</h2>
+  <table class="aqx" style="font-size:25px;">
+    <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="k">React Native</td><td>Write JS/TS once; drives real native views</td><td class="k">Monorepo</td><td>Many packages in one repo (pnpm workspaces)</td></tr>
+      <tr><td class="k">RN Web</td><td>Runs React Native code in the browser too</td><td class="k">Package</td><td>Reusable third-party library from a registry</td></tr>
+      <tr><td class="k">Expo</td><td>Toolkit for native capabilities &amp; builds</td><td class="k">package.json</td><td>Manifest — dependencies + scripts</td></tr>
+      <tr><td class="k">View</td><td>RN's container — the <span class="mono">&lt;div&gt;</span> equivalent</td><td class="k">Lockfile</td><td>Exact pinned versions, so installs match</td></tr>
+      <tr><td class="k">Text</td><td>RN wrapper all text must live inside</td><td class="k">node_modules</td><td>Where installed packages physically land</td></tr>
+      <tr><td class="k">Pressable</td><td>RN touchable — <span class="mono">onPress</span>, not click</td><td class="k">pnpm</td><td>Fast, strict package manager (one shared store)</td></tr>
+      <tr><td class="k">StyleSheet</td><td>RN styles as JS objects (flex → column)</td><td class="k">Transpile</td><td>Compile TS/JSX down to runnable JS</td></tr>
+      <tr><td class="k">FlatList</td><td>Virtualized list — renders only visible rows</td><td class="k">ESLint</td><td>Flags likely bugs without running code</td></tr>
+      <tr><td class="k">SafeAreaView</td><td>Keeps content clear of notches / home bar</td><td class="k">Prettier</td><td>One canonical auto-format on save</td></tr>
+      <tr><td class="k">Native shell</td><td>The compiled iOS/Android app around the JS</td><td class="k">Query key</td><td>React Query's identity for a cached request</td></tr>
+      <tr><td class="k">Stack / Tabs</td><td>react-navigation: push/pop · switch sections</td><td class="k">WebSocket</td><td>Live two-way feed — e.g. price ticks</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8.4 Put it all together -->
+<section class="slide divider">
+      <svg width="53" height="55" viewBox="8 2.5 53 55" fill="none" style="height:48px;width:auto;align-self:flex-start;position:absolute;top:96px;left:110px;"><path d="M13.0886 26.922L13.0889 19.1286L13.0887 19.1285L31.724 8.3722L38.4995 12.283L43.5905 9.35008L42.6551 8.81015V8.80857L31.7255 2.5L31.724 2.50083L31.7226 2.5L8.00479 16.1914L8 16.1887V29.8535L13.0886 26.922Z" fill="#fff"/><path d="M18.48 40.2811L23.5685 43.2181V32.9381L18.48 35.8696V40.281L18.48 40.2811Z" fill="#fff"/><path d="M39.8795 23.5412V43.2181L39.8795 43.2181L44.968 40.2811V20.6096L39.8795 23.5412Z" fill="#fff"/><path d="M50.9599 3.6156L52.723 6.66934L8.02881 32.4026V38.27V38.2739L29.1797 26.0951V46.4569L31.724 47.9254L34.2683 46.4569V23.1651L55.2663 11.0744L57.0821 14.2195L60.8683 4.96425L50.9599 3.6156Z" fill="#fff"/><path d="M53.1517 14.8687L48.0661 17.8048L50.3593 19.1285L50.3592 19.1286L50.3596 19.3386V32.4612V33.4185V40.6614L50.3592 40.8714L50.3593 40.8716L31.724 51.6278L13.0888 40.8716L13.0889 40.8714L13.0885 40.6614V37.9992L8 40.937V42.6346V43.8058V43.8113L8.00479 43.8085L20.793 51.1899V51.1914L31.7226 57.5L31.724 57.4992L31.7255 57.5V57.5V57.5L42.655 51.1914V51.1899L55.4433 43.8085L55.4481 43.8113V43.8058V42.6346V36.3486V35.3914V17.3655V16.1942V16.1887L55.4433 16.1914L53.1517 14.8687Z" fill="#fff"/></svg>
+      <div style="width:96px;height:8px;background:var(--aqx-brand);border-radius:4px;"></div>
+      <h2 style="font-size:104px;margin:36px 0 0;">Questions?</h2>
+      <p class="lead" style="font-size:34px;margin-top:28px;">Next stop: pair on the <span style="color:var(--aqx-brand);font-weight:600;">@aqx/watchlist</span> package and trace one interaction — View → ViewController → Service → View — for real.</p>
+    </section>
+  <div id="counter"></div>
+</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'),canvas=document.getElementById('canvas'),
+      progress=document.getElementById('progress'),counter=document.getElementById('counter');
+  var slides=Array.prototype.slice.call(canvas.querySelectorAll('.slide'));
+  var W=1920,H=1080,i=0;
+  function fromHash(){var h=parseInt((location.hash||'').replace('#',''),10);return (h&&h>=1&&h<=slides.length)?h-1:0;}
+  function fit(){var s=Math.min(window.innerWidth/W,window.innerHeight/H);canvas.style.transform='translate(-50%,-50%) scale('+s+')';}
+  function show(n,push){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(el,idx){el.style.display=idx===i?'flex':'none';});
+    counter.textContent=(i+1)+' / '+slides.length;
+    progress.style.width=((i+1)/slides.length*100)+'%';
+    if(push!==false)history.replaceState(null,'','#'+(i+1));
+    slides[i].querySelectorAll('.rise').forEach(function(r){r.style.animation='none';void r.offsetWidth;r.style.animation='';});
+  }
+  window.addEventListener('resize',fit);
+  window.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight':case 'PageDown':case ' ':case 'Spacebar':e.preventDefault();show(i+1);break;
+      case 'ArrowLeft':case 'PageUp':e.preventDefault();show(i-1);break;
+      case 'Home':e.preventDefault();show(0);break;
+      case 'End':e.preventDefault();show(slides.length-1);break;
+      case 'r':case 'R':show(0);break;
+    }
+  });
+  window.addEventListener('hashchange',function(){show(fromHash(),false);});
+  fit();show(fromHash(),false);
+})();
+</script>
+</body>
+</html>
