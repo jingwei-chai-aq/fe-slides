@@ -2054,46 +2054,68 @@ packages/
   </div>
 </section>
 
-<!-- 8.2 Glossary -->
+<!-- 8.2 Glossary — core React & web (1/2) -->
 <section class="slide">
   <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary</span></div>
   <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — core React &amp; web</h2>
-  <table class="aqx" style="font-size:25px;">
+  <table class="aqx" style="font-size:27px;">
     <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
     <tbody>
-      <tr><td class="k">DOM</td><td>The browser's live tree of page elements</td><td class="k">Store</td><td>App-wide state container (Zustand)</td></tr>
-      <tr><td class="k">SPA</td><td>One JS program drives the whole UI; no reloads</td><td class="k">Slice</td><td>Subscribing to part of a store to limit re-renders</td></tr>
-      <tr><td class="k">Component</td><td>A function that returns UI</td><td class="k">Server state</td><td>Backend-owned data the frontend caches</td></tr>
-      <tr><td class="k">JSX / TSX</td><td>HTML-like syntax inside JS/TS</td><td class="k">Invalidation</td><td>Marking a query stale so it refetches</td></tr>
-      <tr><td class="k">Props</td><td>Read-only inputs passed parent → child</td><td class="k">HMR</td><td>Dev server hot-swapping changed code on save</td></tr>
-      <tr><td class="k">State</td><td>Data a component owns; changing it re-renders</td><td class="k">Bundler</td><td>Compiles + packages source (Rspack, Metro)</td></tr>
-      <tr><td class="k">Hook</td><td>A <span class="mono">useXxx</span> into state or lifecycle</td><td class="k">Model</td><td>MVVM: the API schema / data shapes</td></tr>
-      <tr><td class="k">Virtual DOM</td><td>React's in-memory UI, diffed for minimal updates</td><td class="k">Service</td><td>MVVM: stores context — the state</td></tr>
-      <tr><td class="k">Reconciliation</td><td>Diffing new vs old virtual DOM to patch changes</td><td class="k">ViewController</td><td>MVVM: business logic; UI writes here</td></tr>
-      <tr><td class="k">Prop drilling</td><td>Relaying props through layers that don't use them</td><td class="k">Hook (VM)</td><td>MVVM: lets UI read context</td></tr>
-      <tr><td class="k">Context</td><td>Share a value with a whole subtree</td><td class="k">Schema</td><td>A Zod shape validated at runtime</td></tr>
+      <tr><td class="k">DOM</td><td>The browser's live tree of page elements</td><td class="k">Reconciliation</td><td>Diffing new vs old virtual DOM to patch changes</td></tr>
+      <tr><td class="k">SPA</td><td>One JS program drives the whole UI; no reloads</td><td class="k">Prop drilling</td><td>Relaying props through layers that don't use them</td></tr>
+      <tr><td class="k">Component</td><td>A function that returns UI</td><td class="k">Context</td><td>Share a value with a whole subtree</td></tr>
+      <tr><td class="k">JSX / TSX</td><td>HTML-like syntax inside JS/TS</td><td class="k">Store</td><td>App-wide state container (Zustand)</td></tr>
+      <tr><td class="k">Props</td><td>Read-only inputs passed parent → child</td><td class="k">Slice</td><td>Subscribing to part of a store to limit re-renders</td></tr>
+      <tr><td class="k">State</td><td>Data a component owns; changing it re-renders</td><td class="k">Server state</td><td>Backend-owned data the frontend caches</td></tr>
+      <tr><td class="k">Hook</td><td>A <span class="mono">useXxx</span> into state or lifecycle</td><td class="k">Invalidation</td><td>Marking a query stale so it refetches</td></tr>
+      <tr><td class="k">Virtual DOM</td><td>React's in-memory UI, diffed for minimal updates</td><td class="k">HMR</td><td>Dev server hot-swapping changed code on save</td></tr>
     </tbody>
   </table>
 </section>
 
-<!-- 8.3 Glossary — React Native & tooling -->
+<!-- 8.2b Glossary — core React & web (2/2) -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — core React &amp; web <span style="font-weight:400;color:var(--aqx-muted,#94a3b8);">(cont.)</span></h2>
+  <table class="aqx" style="font-size:27px;">
+    <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Bundler</td><td>Compiles + packages source (Rspack, Metro)</td><td class="k">ViewController</td><td>MVVM: business logic; UI writes here</td></tr>
+      <tr><td class="k">Model</td><td>MVVM: the API schema / data shapes</td><td class="k">Hook (VM)</td><td>MVVM: lets UI read context</td></tr>
+      <tr><td class="k">Service</td><td>MVVM: stores context — the state</td><td class="k">Schema</td><td>A Zod shape validated at runtime</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8.3 Glossary — React Native & tooling (1/2) -->
 <section class="slide">
   <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary (RN &amp; tooling)</span></div>
   <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — React Native &amp; tooling</h2>
-  <table class="aqx" style="font-size:25px;">
+  <table class="aqx" style="font-size:27px;">
     <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
     <tbody>
-      <tr><td class="k">React Native</td><td>Write JS/TS once; drives real native views</td><td class="k">Monorepo</td><td>Many packages in one repo (pnpm workspaces)</td></tr>
-      <tr><td class="k">RN Web</td><td>Runs React Native code in the browser too</td><td class="k">Package</td><td>Reusable third-party library from a registry</td></tr>
-      <tr><td class="k">Expo</td><td>Toolkit for native capabilities &amp; builds</td><td class="k">package.json</td><td>Manifest — dependencies + scripts</td></tr>
-      <tr><td class="k">View</td><td>RN's container — the <span class="mono">&lt;div&gt;</span> equivalent</td><td class="k">Lockfile</td><td>Exact pinned versions, so installs match</td></tr>
-      <tr><td class="k">Text</td><td>RN wrapper all text must live inside</td><td class="k">node_modules</td><td>Where installed packages physically land</td></tr>
-      <tr><td class="k">Pressable</td><td>RN touchable — <span class="mono">onPress</span>, not click</td><td class="k">pnpm</td><td>Fast, strict package manager (one shared store)</td></tr>
-      <tr><td class="k">StyleSheet</td><td>RN styles as JS objects (flex → column)</td><td class="k">Transpile</td><td>Compile TS/JSX down to runnable JS</td></tr>
-      <tr><td class="k">FlatList</td><td>Virtualized list — renders only visible rows</td><td class="k">ESLint</td><td>Flags likely bugs without running code</td></tr>
-      <tr><td class="k">SafeAreaView</td><td>Keeps content clear of notches / home bar</td><td class="k">Prettier</td><td>One canonical auto-format on save</td></tr>
-      <tr><td class="k">Native shell</td><td>The compiled iOS/Android app around the JS</td><td class="k">Query key</td><td>React Query's identity for a cached request</td></tr>
-      <tr><td class="k">Stack / Tabs</td><td>react-navigation: push/pop · switch sections</td><td class="k">WebSocket</td><td>Live two-way feed — e.g. price ticks</td></tr>
+      <tr><td class="k">React Native</td><td>Write JS/TS once; drives real native views</td><td class="k">SafeAreaView</td><td>Keeps content clear of notches / home bar</td></tr>
+      <tr><td class="k">RN Web</td><td>Runs React Native code in the browser too</td><td class="k">Native shell</td><td>The compiled iOS/Android app around the JS</td></tr>
+      <tr><td class="k">Expo</td><td>Toolkit for native capabilities &amp; builds</td><td class="k">Stack / Tabs</td><td>react-navigation: push/pop · switch sections</td></tr>
+      <tr><td class="k">View</td><td>RN's container — the <span class="mono">&lt;div&gt;</span> equivalent</td><td class="k">Monorepo</td><td>Many packages in one repo (pnpm workspaces)</td></tr>
+      <tr><td class="k">Text</td><td>RN wrapper all text must live inside</td><td class="k">Package</td><td>Reusable third-party library from a registry</td></tr>
+      <tr><td class="k">Pressable</td><td>RN touchable — <span class="mono">onPress</span>, not click</td><td class="k">package.json</td><td>Manifest — dependencies + scripts</td></tr>
+      <tr><td class="k">StyleSheet</td><td>RN styles as JS objects (flex → column)</td><td class="k">Lockfile</td><td>Exact pinned versions, so installs match</td></tr>
+      <tr><td class="k">FlatList</td><td>Virtualized list — renders only visible rows</td><td class="k">node_modules</td><td>Where installed packages physically land</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8.3b Glossary — React Native & tooling (2/2) -->
+<section class="slide">
+  <div class="eyebrow rise"><div class="bar"></div><span>Reference · glossary (RN &amp; tooling)</span></div>
+  <h2 class="h2 rise" style="margin:36px 0 24px;">Glossary — React Native &amp; tooling <span style="font-weight:400;color:var(--aqx-muted,#94a3b8);">(cont.)</span></h2>
+  <table class="aqx" style="font-size:27px;">
+    <thead><tr><th>Term</th><th>Meaning</th><th class="w">Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="k">pnpm</td><td>Fast, strict package manager (one shared store)</td><td class="k">Prettier</td><td>One canonical auto-format on save</td></tr>
+      <tr><td class="k">Transpile</td><td>Compile TS/JSX down to runnable JS</td><td class="k">Query key</td><td>React Query's identity for a cached request</td></tr>
+      <tr><td class="k">ESLint</td><td>Flags likely bugs without running code</td><td class="k">WebSocket</td><td>Live two-way feed — e.g. price ticks</td></tr>
     </tbody>
   </table>
 </section>
