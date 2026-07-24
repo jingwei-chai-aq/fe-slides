@@ -43,6 +43,33 @@ html,body{margin:0;height:100%;background:#0b0d16;overflow:hidden;font-family:'I
 #stage:hover #counter{opacity:.9;}
 #progress{position:fixed;left:0;top:0;height:4px;background:var(--aqx-brand);z-index:10;transition:width .3s;}
 
+/* ── jump-to-page menu ── */
+#menuBtn{position:fixed;top:18px;right:18px;z-index:40;width:48px;height:48px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:8px;cursor:pointer;opacity:.5;transition:opacity .25s,background .2s;}
+#stage:hover ~ #menuBtn,#menuBtn:hover,#menuBtn.open{opacity:.95;}
+#menuBtn span{display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:transform .25s,opacity .2s;}
+#menuBtn.open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+#menuBtn.open span:nth-child(2){opacity:0;}
+#menuBtn.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+#menuBackdrop{position:fixed;inset:0;z-index:38;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;}
+#menuBackdrop.open{opacity:1;visibility:visible;}
+#menu{position:fixed;top:0;right:0;bottom:0;z-index:39;width:400px;max-width:86vw;background:#141826;color:#EDEEF2;
+  box-shadow:-8px 0 40px rgba(0,0,0,.5);transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.7,.2,1);
+  display:flex;flex-direction:column;font-family:'Inter',system-ui,sans-serif;overscroll-behavior:contain;}
+#menu.open{transform:none;}
+#menuHead{padding:22px 26px 14px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9BA0B5;flex-shrink:0;}
+#menuList{list-style:none;margin:0;padding:0 12px 24px;overflow-y:auto;flex:1;}
+#menuList li{margin:0;}
+#menuList li button{display:flex;width:100%;align-items:baseline;gap:12px;text-align:left;background:none;border:none;color:inherit;cursor:pointer;
+  font-family:inherit;font-size:16px;line-height:1.35;padding:11px 14px;border-radius:6px;transition:background .15s;}
+#menuList li button:hover{background:rgba(255,255,255,.07);}
+#menuList li button .mnum{flex-shrink:0;width:34px;font-variant-numeric:tabular-nums;color:#6B7089;font-size:14px;font-weight:600;}
+#menuList li.section button{margin-top:14px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--aqx-brand);}
+#menuList li.section:first-child button{margin-top:0;}
+#menuList li.section button .mnum{color:var(--aqx-brand);}
+#menuList li button.current{background:rgba(0,188,216,.16);color:#fff;}
+#menuList li button.current .mnum{color:var(--aqx-brand);}
+
 /* ── typographic + component primitives ── */
 .slide h1,.slide h2,.slide h3,.slide h4{margin:0;font-weight:700;letter-spacing:-1px;line-height:1.1;}
 .slide p{margin:0;}
@@ -2124,11 +2151,21 @@ packages/
 <section class="slide divider">
       <svg width="53" height="55" viewBox="8 2.5 53 55" fill="none" style="height:48px;width:auto;align-self:flex-start;position:absolute;top:96px;left:110px;"><path d="M13.0886 26.922L13.0889 19.1286L13.0887 19.1285L31.724 8.3722L38.4995 12.283L43.5905 9.35008L42.6551 8.81015V8.80857L31.7255 2.5L31.724 2.50083L31.7226 2.5L8.00479 16.1914L8 16.1887V29.8535L13.0886 26.922Z" fill="#fff"/><path d="M18.48 40.2811L23.5685 43.2181V32.9381L18.48 35.8696V40.281L18.48 40.2811Z" fill="#fff"/><path d="M39.8795 23.5412V43.2181L39.8795 43.2181L44.968 40.2811V20.6096L39.8795 23.5412Z" fill="#fff"/><path d="M50.9599 3.6156L52.723 6.66934L8.02881 32.4026V38.27V38.2739L29.1797 26.0951V46.4569L31.724 47.9254L34.2683 46.4569V23.1651L55.2663 11.0744L57.0821 14.2195L60.8683 4.96425L50.9599 3.6156Z" fill="#fff"/><path d="M53.1517 14.8687L48.0661 17.8048L50.3593 19.1285L50.3592 19.1286L50.3596 19.3386V32.4612V33.4185V40.6614L50.3592 40.8714L50.3593 40.8716L31.724 51.6278L13.0888 40.8716L13.0889 40.8714L13.0885 40.6614V37.9992L8 40.937V42.6346V43.8058V43.8113L8.00479 43.8085L20.793 51.1899V51.1914L31.7226 57.5L31.724 57.4992L31.7255 57.5V57.5V57.5L42.655 51.1914V51.1899L55.4433 43.8085L55.4481 43.8113V43.8058V42.6346V36.3486V35.3914V17.3655V16.1942V16.1887L55.4433 16.1914L53.1517 14.8687Z" fill="#fff"/></svg>
       <div style="width:96px;height:8px;background:var(--aqx-brand);border-radius:4px;"></div>
-      <h2 style="font-size:104px;margin:36px 0 0;">Questions?</h2>
+      <h2 style="font-size:104px;margin:36px 0 0;">Thank Q !</h2>
       <p class="lead" style="font-size:34px;margin-top:28px;">Next stop: pair on the <span style="color:var(--aqx-brand);font-weight:600;">@aqx/watchlist</span> package and trace one interaction — View → ViewController → Service → View — for real.</p>
     </section>
   <div id="counter"></div>
 </div>
+
+<!-- ── jump-to-page menu ── -->
+<button id="menuBtn" aria-label="Open menu" aria-expanded="false">
+  <span></span><span></span><span></span>
+</button>
+<div id="menuBackdrop"></div>
+<nav id="menu" aria-hidden="true">
+  <div id="menuHead">Jump to</div>
+  <ol id="menuList"></ol>
+</nav>
 
 <script>
 (function(){
@@ -2149,17 +2186,53 @@ packages/
       canvas.style.transform='translate(-50%,-50%) scale('+s+')';
     }
   }
+  // ── build the jump-to menu from the slides themselves ──
+  var menuBtn=document.getElementById('menuBtn'),menu=document.getElementById('menu'),
+      menuList=document.getElementById('menuList'),menuBackdrop=document.getElementById('menuBackdrop');
+  function slideTitle(el,idx){
+    if(idx===0)return 'Title';
+    if(el.classList.contains('divider')){
+      var h=el.querySelector('h2');return h?h.textContent.trim():'Section';
+    }
+    var eb=el.querySelector('.eyebrow span');
+    var h2=el.querySelector('h2,h1');
+    if(h2)return h2.textContent.trim();
+    if(eb)return eb.textContent.trim();
+    return 'Slide '+(idx+1);
+  }
+  var menuBtns=slides.map(function(el,idx){
+    var li=document.createElement('li');
+    if(el.classList.contains('divider'))li.className='section';
+    var b=document.createElement('button');
+    b.innerHTML='<span class="mnum">'+(idx+1)+'</span><span>'+slideTitle(el,idx).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>';
+    b.addEventListener('click',function(){show(idx);closeMenu();});
+    li.appendChild(b);menuList.appendChild(li);
+    return b;
+  });
+  var menuOpen=false;
+  function openMenu(){menuOpen=true;menu.classList.add('open');menuBtn.classList.add('open');menuBackdrop.classList.add('open');
+    menu.setAttribute('aria-hidden','false');menuBtn.setAttribute('aria-expanded','true');
+    var cur=menuList.querySelector('.current');if(cur)cur.scrollIntoView({block:'center'});}
+  function closeMenu(){menuOpen=false;menu.classList.remove('open');menuBtn.classList.remove('open');menuBackdrop.classList.remove('open');
+    menu.setAttribute('aria-hidden','true');menuBtn.setAttribute('aria-expanded','false');}
+  menuBtn.addEventListener('click',function(){menuOpen?closeMenu():openMenu();});
+  menuBackdrop.addEventListener('click',closeMenu);
+
   function show(n,push){
     i=Math.max(0,Math.min(slides.length-1,n));
     slides.forEach(function(el,idx){el.style.display=idx===i?'flex':'none';});
     counter.textContent=(i+1)+' / '+slides.length;
     progress.style.width=((i+1)/slides.length*100)+'%';
+    menuBtns.forEach(function(b,idx){b.classList.toggle('current',idx===i);});
     if(push!==false)history.replaceState(null,'','#'+(i+1));
     slides[i].querySelectorAll('.rise').forEach(function(r){r.style.animation='none';void r.offsetWidth;r.style.animation='';});
   }
   window.addEventListener('resize',fit);
   window.addEventListener('orientationchange',fit);
   window.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){if(menuOpen){e.preventDefault();closeMenu();}return;}
+    if(e.key==='m'||e.key==='M'){e.preventDefault();menuOpen?closeMenu():openMenu();return;}
+    if(menuOpen)return; // let arrows scroll the menu, don't move slides
     switch(e.key){
       case 'ArrowRight':case 'PageDown':case ' ':case 'Spacebar':e.preventDefault();show(i+1);break;
       case 'ArrowLeft':case 'PageUp':e.preventDefault();show(i-1);break;
