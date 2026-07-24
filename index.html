@@ -35,6 +35,8 @@
 
 /* ── standalone deck shell ── */
 html,body{margin:0;height:100%;background:#0b0d16;overflow:hidden;font-family:'Inter',system-ui,sans-serif;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;}
+/* let people highlight/copy the actual slide content, keep chrome drag-safe */
+.slide{-webkit-user-select:text;user-select:text;}
 #stage{position:fixed;inset:0;overflow:hidden;}
 #canvas{position:absolute;top:50%;left:50%;width:1920px;height:1080px;transform-origin:center center;transform:translate(-50%,-50%);}
 #canvas .slide{position:absolute;inset:0;width:1920px;height:1080px;display:none;flex-direction:column;box-sizing:border-box;
